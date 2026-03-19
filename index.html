@@ -141,6 +141,17 @@
                     <div class="absolute top-0 right-0 bg-[#06C755] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">Up to 4%/yr</div>
                     <p class="text-gray-400 text-xs font-medium">Total Assets</p>
                     <h3 class="text-[32px] font-black mt-1">NT$ <span id="lucky-balance">88,046</span></h3>
+                    
+                    <div class="flex gap-4 mt-3 pt-3 border-t border-gray-700">
+                        <div>
+                            <p class="text-[10px] text-gray-400">Total Profit</p>
+                            <p class="text-sm text-[#06C755] font-bold">+ NT$ 1,240</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400">Today's Profit</p>
+                            <p class="text-sm text-[#06C755] font-bold">+ NT$ 9.6</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
@@ -239,7 +250,6 @@
         const ctx = document.getElementById('expenseChart').getContext('2d');
         let categories = { "Food": 0, "Shopping": 0, "Transport": 0, "Invest/Transfer": 0, "Other": 0 };
         
-        // Phân loại lại chính xác bằng keyword và icon
         state.transactions.forEach(tx => {
             let n = tx.name.toLowerCase();
             if(n.match(/shopping|bag|pen|shopee|buy|shirt|clothes/) || tx.icon === '🛍️' || tx.icon === '🛒') categories["Shopping"] += tx.amount;
@@ -331,7 +341,7 @@
         showToast(`Deposited NT$ ${amount} to Lucky Bag!`);
     }
 
-    // --- LOGIC AI CHAT (CẬP NHẬT NLP NHẬN DIỆN TỪ KHÓA) ---
+    // --- LOGIC AI CHAT ---
     function processChat() {
         const input = document.getElementById('chat-input');
         const history = document.getElementById('chat-history');
@@ -344,12 +354,10 @@
         const matchAmount = text.match(/\d+/);
         const amount = matchAmount ? parseInt(matchAmount[0]) : 0;
         
-        // Tách lấy chữ làm tên giao dịch (bỏ số đi)
         const cleanName = text.replace(/\d+/g, '').trim() || 'Expense';
         const lowerText = cleanName.toLowerCase();
         
-        // AI Gán Icon tự động dựa vào từ khóa
-        let catIcon = "🧾"; // Mặc định là hóa đơn (Other)
+        let catIcon = "🧾";
         if (lowerText.match(/bus|mrt|taxi|train|uber|grab|transport/)) catIcon = "🚌";
         else if (lowerText.match(/dinner|lunch|breakfast|food|coffee|drink|eat|salad/)) catIcon = "🍔";
         else if (lowerText.match(/shopping|bag|pen|shopee|buy|shirt|clothes/)) catIcon = "🛍️";
@@ -362,7 +370,6 @@
             } else if (amount > 0 && amount <= state.wallet) {
                 state.wallet -= amount;
                 
-                // Đẩy vào lịch sử với Tên và Icon đã được xử lý
                 state.transactions.push({ name: `AI Log: ${cleanName}`, amount: amount, icon: catIcon, time: "Just now" });
                 updateUI();
                 botReply = `Logged <b>${amount} NTD</b>. Your wallet has ${state.wallet.toLocaleString()} NTD left.`;
