@@ -203,7 +203,7 @@
     };
 
     let chartInstance = null;
-    let toastTimeout = null; // Biến xử lý thời gian tắt Toast
+    let toastTimeout = null;
 
     // --- CẬP NHẬT GIAO DIỆN & RENDER LIST ---
     function updateUI() {
@@ -217,13 +217,12 @@
         
         let txs = state.transactions.slice().reverse();
         
-        // Render List
         txs.forEach((tx, index) => {
             const html = `
                 <div class="flex items-center justify-between p-3 border-b border-gray-50">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg">${tx.icon}</div>
-                        <div><p class="text-sm font-bold text-gray-800">${tx.name}</p><p class="text-[10px] text-gray-400">${tx.time}</p></div>
+                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg shadow-sm border border-gray-200">${tx.icon}</div>
+                        <div><p class="text-sm font-bold text-gray-800 capitalize">${tx.name}</p><p class="text-[10px] text-gray-400">${tx.time}</p></div>
                     </div>
                     <span class="text-sm font-bold text-gray-800">- NT$ ${tx.amount.toLocaleString()}</span>
                 </div>
@@ -240,12 +239,13 @@
         const ctx = document.getElementById('expenseChart').getContext('2d');
         let categories = { "Food": 0, "Shopping": 0, "Transport": 0, "Invest/Transfer": 0, "Other": 0 };
         
+        // Phân loại lại chính xác bằng keyword và icon
         state.transactions.forEach(tx => {
             let n = tx.name.toLowerCase();
-            if(n.includes('shopee') || n.includes('buy') || n.includes('bag')) categories["Shopping"] += tx.amount;
-            else if(n.includes('metro') || n.includes('transport') || n.includes('taxi')) categories["Transport"] += tx.amount;
-            else if(n.includes('transfer') || n.includes('deposit') || n.includes('lucky')) categories["Invest/Transfer"] += tx.amount;
-            else if(n.includes('food') || n.includes('lunch') || n.includes('coffee') || tx.icon === '🤖' || tx.icon === '🥗') categories["Food"] += tx.amount;
+            if(n.match(/shopping|bag|pen|shopee|buy|shirt|clothes/) || tx.icon === '🛍️' || tx.icon === '🛒') categories["Shopping"] += tx.amount;
+            else if(n.match(/bus|mrt|taxi|train|uber|grab|transport/) || tx.icon === '🚌' || tx.icon === '🚇') categories["Transport"] += tx.amount;
+            else if(n.match(/transfer|deposit|lucky/) || tx.icon === '💰' || tx.icon === '💸') categories["Invest/Transfer"] += tx.amount;
+            else if(n.match(/dinner|lunch|breakfast|food|coffee|drink|eat|salad/) || tx.icon === '🍔' || tx.icon === '🥗') categories["Food"] += tx.amount;
             else categories["Other"] += tx.amount;
         });
 
@@ -287,13 +287,11 @@
         if(screen === 'history') updateChart();
     }
 
-    // --- HIỂN THỊ TOAST ĐÃ FIX LỖI ---
+    // --- HIỂN THỊ TOAST ---
     function showToast(message) {
         const toast = document.getElementById('system-toast');
         toast.innerText = message;
         toast.classList.remove('hidden');
-        
-        // Reset thời gian để nếu bấm liên tục, thông báo không bị biến mất ngay
         if (toastTimeout) clearTimeout(toastTimeout);
         toastTimeout = setTimeout(() => toast.classList.add('hidden'), 2500);
     }
@@ -333,6 +331,7 @@
         showToast(`Deposited NT$ ${amount} to Lucky Bag!`);
     }
 
+    // --- LOGIC AI CHAT (CẬP NHẬT NLP NHẬN DIỆN TỪ KHÓA) ---
     function processChat() {
         const input = document.getElementById('chat-input');
         const history = document.getElementById('chat-history');
@@ -344,6 +343,17 @@
 
         const matchAmount = text.match(/\d+/);
         const amount = matchAmount ? parseInt(matchAmount[0]) : 0;
+        
+        // Tách lấy chữ làm tên giao dịch (bỏ số đi)
+        const cleanName = text.replace(/\d+/g, '').trim() || 'Expense';
+        const lowerText = cleanName.toLowerCase();
+        
+        // AI Gán Icon tự động dựa vào từ khóa
+        let catIcon = "🧾"; // Mặc định là hóa đơn (Other)
+        if (lowerText.match(/bus|mrt|taxi|train|uber|grab|transport/)) catIcon = "🚌";
+        else if (lowerText.match(/dinner|lunch|breakfast|food|coffee|drink|eat|salad/)) catIcon = "🍔";
+        else if (lowerText.match(/shopping|bag|pen|shopee|buy|shirt|clothes/)) catIcon = "🛍️";
+        else if (lowerText.match(/transfer|deposit|lucky/)) catIcon = "💸";
 
         setTimeout(() => {
             let botReply = '';
@@ -351,7 +361,9 @@
                 botReply = `<span class="text-red-600 font-bold">⚠️ Blocked (99.99% Security)</span><br>NT$ ${amount.toLocaleString()} is unusually high.`;
             } else if (amount > 0 && amount <= state.wallet) {
                 state.wallet -= amount;
-                state.transactions.push({ name: `AI Logged: ${text.replace(/\d+/g, '').trim() || 'Expense'}`, amount: amount, icon: "🤖", time: "Just now" });
+                
+                // Đẩy vào lịch sử với Tên và Icon đã được xử lý
+                state.transactions.push({ name: `AI Log: ${cleanName}`, amount: amount, icon: catIcon, time: "Just now" });
                 updateUI();
                 botReply = `Logged <b>${amount} NTD</b>. Your wallet has ${state.wallet.toLocaleString()} NTD left.`;
             } else if (amount > state.wallet) {
