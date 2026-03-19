@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LineMate - Full Functional App</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         .iphone-x {
             width: 375px; height: 812px; background-color: #f3f4f6; border-radius: 40px;
@@ -75,17 +77,12 @@
                     </div>
                 </div>
 
-                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex items-start gap-3">
-                    <div class="text-2xl">📚</div>
-                    <div>
-                        <p class="text-sm font-bold text-blue-900">Weekly Digest</p>
-                        <p class="text-xs text-blue-700 mt-1">You've hit your study goals and kept your budget tight. Great discipline!</p>
-                    </div>
-                </div>
-
                 <div>
-                    <h3 class="font-bold text-gray-800 mb-3">Recent Transactions</h3>
-                    <div id="transaction-list" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 space-y-1">
+                    <div class="flex justify-between items-end mb-3">
+                        <h3 class="font-bold text-gray-800">Recent Transactions</h3>
+                        <button onclick="switchScreen('history')" class="text-xs text-[#06C755] font-bold">View All</button>
+                    </div>
+                    <div id="transaction-list-home" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 space-y-1">
                         </div>
                 </div>
             </div>
@@ -102,13 +99,33 @@
 
             <div id="chat-history" class="flex-1 p-5 overflow-y-auto space-y-4 text-sm pb-[150px]">
                 <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-[85%] border border-gray-100 text-gray-700">
-                    Hi! Tell me what you bought today. E.g., "Chicken salad 120"
+                    Hi! Tell me what you bought today. E.g., "Food 120"
                 </div>
             </div>
 
             <div class="absolute bottom-[80px] w-full p-4 bg-white border-t border-gray-100 flex gap-2 z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
                 <input id="chat-input" type="text" placeholder="Type your expense..." class="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#06C755]/50">
                 <button onclick="processChat()" class="bg-line text-white rounded-full w-11 h-11 flex items-center justify-center shadow-md">⬆️</button>
+            </div>
+        </div>
+
+        <div id="screen-history" class="absolute inset-0 bg-gray-50 hidden fade-in z-20 overflow-y-auto pb-[100px]">
+            <div class="bg-white pt-12 pb-3 px-5 flex justify-between items-center z-30 shadow-sm sticky top-0">
+                <h2 class="font-bold text-gray-800 text-lg">Transaction History</h2>
+                <span class="text-xl">📊</span>
+            </div>
+            <div class="p-5">
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-6 flex flex-col items-center">
+                    <h3 class="font-bold text-gray-800 mb-2 self-start">Expense Breakdown</h3>
+                    <p class="text-xs text-gray-400 self-start mb-4">Auto-categorized by AI</p>
+                    <div class="relative w-48 h-48">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-gray-800 mb-3">All Transactions</h3>
+                <div id="transaction-list-full" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 space-y-1">
+                    </div>
             </div>
         </div>
 
@@ -124,7 +141,6 @@
                     <div class="absolute top-0 right-0 bg-[#06C755] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">Up to 4%/yr</div>
                     <p class="text-gray-400 text-xs font-medium">Total Assets</p>
                     <h3 class="text-[32px] font-black mt-1">NT$ <span id="lucky-balance">88,046</span></h3>
-                    <p class="text-xs text-[#06C755] font-bold mt-2">Today's Profit: + NT$ 9.6</p>
                 </div>
 
                 <div class="mt-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
@@ -132,14 +148,6 @@
                     <div class="flex gap-2">
                         <input id="deposit-input" type="number" placeholder="Amount (NT$)" class="flex-1 bg-gray-100 rounded-xl px-4 py-2 text-sm outline-none">
                         <button onclick="handleDeposit()" class="bg-line text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md">Deposit</button>
-                    </div>
-                </div>
-
-                <h4 class="font-bold text-gray-800 mt-6 mb-3">AI Portfolios Rebalancing</h4>
-                <div class="space-y-3">
-                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
-                        <div class="flex items-center gap-3"><div class="text-2xl">📈</div><div><p class="font-bold text-sm">Stock Investment</p><p class="text-[10px] text-gray-400">Maximize profit</p></div></div>
-                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2 py-1 rounded font-bold">Active</span>
                     </div>
                 </div>
             </div>
@@ -154,19 +162,17 @@
             </div>
             <input id="transfer-id" type="text" placeholder="Line ID or Phone Number" class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none mb-3">
             <input id="transfer-amount" type="number" placeholder="Amount (NT$)" class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none mb-5">
-            <button onclick="submitTransfer()" class="w-full bg-line text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition">Send Now</button>
+            <button onclick="submitTransfer()" class="w-full bg-line text-white font-bold py-3 rounded-xl shadow-md">Send Now</button>
         </div>
     </div>
 
-    <div id="system-toast" class="hidden absolute top-14 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full text-xs font-bold z-[100] shadow-lg fade-in whitespace-nowrap">
-        Message
-    </div>
+    <div id="system-toast" class="hidden absolute top-14 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-xl text-xs font-bold z-[100] shadow-lg fade-in w-[90%] text-center leading-relaxed"></div>
 
     <div class="absolute bottom-0 w-full h-[80px] bg-white border-t border-gray-100 flex justify-between items-center px-8 z-50">
         <button onclick="switchScreen('home')" id="nav-home" class="flex flex-col items-center gap-1 text-[#06C755] pb-4">
             <span class="text-xl">🏠</span><span class="text-[9px] font-bold">Home</span>
         </button>
-        <button onclick="showToast('History page is coming soon!')" class="flex flex-col items-center gap-1 text-gray-400 pb-4">
+        <button onclick="switchScreen('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400 pb-4">
             <span class="text-xl">📊</span><span class="text-[9px] font-bold">History</span>
         </button>
         <button onclick="switchScreen('chat')" class="relative -top-4 w-14 h-14 bg-[#06C755] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200 border-4 border-white">
@@ -179,7 +185,6 @@
             <span class="text-xl">👤</span><span class="text-[9px] font-bold">Account</span>
         </button>
     </div>
-    
 </div>
 
 <script>
@@ -190,20 +195,28 @@
         luckyBag: 88046,
         transactions: [
             { name: "Shopee Checkout", amount: 450, icon: "🛒", time: "Today, 14:30" },
-            { name: "Taipei Metro", amount: 25, icon: "🚇", time: "Today, 08:15" }
+            { name: "Taipei Metro", amount: 25, icon: "🚇", time: "Today, 08:15" },
+            { name: "Lunch Combo", amount: 150, icon: "🥗", time: "Yesterday" }
         ]
     };
 
-    // --- CẬP NHẬT GIAO DIỆN ---
+    let chartInstance = null; // Biến lưu biểu đồ
+
+    // --- CẬP NHẬT GIAO DIỆN & RENDER LIST ---
     function updateUI() {
         document.getElementById('wallet-balance').innerText = state.wallet.toLocaleString();
         document.getElementById('peace-balance').innerText = state.peaceFund.toLocaleString();
         document.getElementById('lucky-balance').innerText = state.luckyBag.toLocaleString();
 
-        const txList = document.getElementById('transaction-list');
-        txList.innerHTML = '';
-        state.transactions.slice().reverse().forEach(tx => {
-            txList.innerHTML += `
+        const txHome = document.getElementById('transaction-list-home');
+        const txFull = document.getElementById('transaction-list-full');
+        txHome.innerHTML = ''; txFull.innerHTML = '';
+        
+        let txs = state.transactions.slice().reverse();
+        
+        // Render List
+        txs.forEach((tx, index) => {
+            const html = `
                 <div class="flex items-center justify-between p-3 border-b border-gray-50">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg">${tx.icon}</div>
@@ -212,17 +225,69 @@
                     <span class="text-sm font-bold text-gray-800">- NT$ ${tx.amount.toLocaleString()}</span>
                 </div>
             `;
+            if(index < 3) txHome.innerHTML += html; // Home chỉ hiện 3 dòng
+            txFull.innerHTML += html; // History hiện tất cả
         });
+
+        // Update Chart
+        updateChart();
     }
 
-    updateUI();
+    // --- VẼ BIỂU ĐỒ TRÒN (CHART.JS) ---
+    function updateChart() {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        
+        // AI Tự động phân loại chi tiêu dựa vào Tên (Keyword matching)
+        let categories = { "Food": 0, "Shopping": 0, "Transport": 0, "Invest/Transfer": 0, "Other": 0 };
+        
+        state.transactions.forEach(tx => {
+            let n = tx.name.toLowerCase();
+            if(n.includes('shopee') || n.includes('buy') || n.includes('bag')) categories["Shopping"] += tx.amount;
+            else if(n.includes('metro') || n.includes('transport') || n.includes('taxi')) categories["Transport"] += tx.amount;
+            else if(n.includes('transfer') || n.includes('deposit') || n.includes('lucky')) categories["Invest/Transfer"] += tx.amount;
+            else if(n.includes('food') || n.includes('lunch') || n.includes('coffee') || tx.icon === '🤖' || tx.icon === '🥗') categories["Food"] += tx.amount;
+            else categories["Other"] += tx.amount;
+        });
+
+        // Lọc ra các mục có chi tiêu > 0
+        const labels = Object.keys(categories).filter(k => categories[k] > 0);
+        const data = labels.map(k => categories[k]);
+        const colors = ['#06C755', '#FF9F40', '#36A2EB', '#9966FF', '#C9CBCF']; // Màu sắc LineMate
+
+        if (chartInstance) {
+            chartInstance.data.labels = labels;
+            chartInstance.data.datasets[0].data = data;
+            chartInstance.update();
+        } else {
+            // Khởi tạo biểu đồ lần đầu
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut', // Dạng nhẫn (hiện đại hơn Pie)
+                data: {
+                    labels: labels,
+                    datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, cutout: '65%',
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 10} } } }
+                }
+            });
+        }
+    }
 
     // --- ĐIỀU HƯỚNG MÀN HÌNH ---
     function switchScreen(screen) {
-        ['home', 'chat', 'lucky'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
+        ['home', 'chat', 'lucky', 'history'].forEach(s => {
+            document.getElementById(`screen-${s}`).classList.add('hidden');
+        });
         document.getElementById(`screen-${screen}`).classList.remove('hidden');
         document.getElementById('bg-header').style.display = screen === 'home' ? 'block' : 'none';
-        document.getElementById('nav-home').className = `flex flex-col items-center gap-1 pb-4 ${screen === 'home' ? 'text-[#06C755]' : 'text-gray-400'}`;
+        
+        // Reset màu icon Nav Bottom
+        ['home', 'history'].forEach(s => {
+            document.getElementById(`nav-${s}`).className = `flex flex-col items-center gap-1 pb-4 ${screen === s ? 'text-[#06C755]' : 'text-gray-400'}`;
+        });
+
+        if(screen === 'history') updateChart(); // Ép vẽ lại biểu đồ khi vào trang History
     }
 
     // --- HIỂN THỊ TOAST ---
@@ -230,53 +295,42 @@
         const toast = document.getElementById('system-toast');
         toast.innerText = message;
         toast.classList.remove('hidden');
-        setTimeout(() => toast.classList.add('hidden'), 2000);
+        setTimeout(() => toast.classList.add('hidden'), 2500);
     }
 
-    // --- CHỨC NĂNG TRANSFER ---
+    // --- CHỨC NĂNG CƠ BẢN ---
     function openTransferModal() { document.getElementById('transfer-modal').classList.remove('hidden'); }
     function closeTransferModal() { document.getElementById('transfer-modal').classList.add('hidden'); }
     
     function submitTransfer() {
         const id = document.getElementById('transfer-id').value.trim();
         const amount = parseInt(document.getElementById('transfer-amount').value);
-
-        if (!id || isNaN(amount) || amount <= 0) return showToast("Please enter valid ID and amount!");
+        if (!id || isNaN(amount) || amount <= 0) return showToast("Invalid ID or amount!");
         if (amount > state.wallet) return showToast("Insufficient balance!");
 
         state.wallet -= amount;
         state.transactions.push({ name: `Transfer to ${id}`, amount: amount, icon: "💸", time: "Just now" });
-        updateUI();
-        closeTransferModal();
-        showToast(`Successfully sent NT$ ${amount} to ${id}`);
-        
-        document.getElementById('transfer-id').value = '';
-        document.getElementById('transfer-amount').value = '';
+        updateUI(); closeTransferModal();
+        showToast(`Sent NT$ ${amount} to ${id}`);
+        document.getElementById('transfer-id').value = ''; document.getElementById('transfer-amount').value = '';
     }
 
-    // --- CÁC CHỨC NĂNG KHÁC ---
     function handleMood(mood, amount) {
         if (state.wallet >= amount && amount > 0) {
-            state.wallet -= amount;
-            state.peaceFund += amount;
-            updateUI();
+            state.wallet -= amount; state.peaceFund += amount; updateUI();
         }
         showToast(amount > 0 ? `+${amount} NTD auto-saved to Peace Fund!` : "Balance is key. Have a good day!");
     }
 
     function handleDeposit() {
-        const input = document.getElementById('deposit-input');
-        const amount = parseInt(input.value);
-
+        const amount = parseInt(document.getElementById('deposit-input').value);
         if (isNaN(amount) || amount <= 0) return showToast("Invalid amount.");
         if (amount > state.wallet) return showToast("Insufficient balance.");
 
-        state.wallet -= amount;
-        state.luckyBag += amount;
+        state.wallet -= amount; state.luckyBag += amount;
         state.transactions.push({ name: "Deposit to Lucky Bag", amount: amount, icon: "💰", time: "Just now" });
-        updateUI();
-        input.value = '';
-        showToast(`Deposited NT$ ${amount.toLocaleString()} to Lucky Bag!`);
+        updateUI(); document.getElementById('deposit-input').value = '';
+        showToast(`Deposited NT$ ${amount} to Lucky Bag!`);
     }
 
     function processChat() {
@@ -286,8 +340,7 @@
         if(!text) return;
 
         history.innerHTML += `<div class="flex justify-end fade-in"><div class="bg-[#06C755] text-white p-3 rounded-2xl rounded-tr-none max-w-[80%]">${text}</div></div>`;
-        input.value = '';
-        history.scrollTop = history.scrollHeight;
+        input.value = ''; history.scrollTop = history.scrollHeight;
 
         const matchAmount = text.match(/\d+/);
         const amount = matchAmount ? parseInt(matchAmount[0]) : 0;
@@ -298,7 +351,7 @@
                 botReply = `<span class="text-red-600 font-bold">⚠️ Blocked (99.99% Security)</span><br>NT$ ${amount.toLocaleString()} is unusually high.`;
             } else if (amount > 0 && amount <= state.wallet) {
                 state.wallet -= amount;
-                state.transactions.push({ name: "AI Logged Expense", amount: amount, icon: "🤖", time: "Just now" });
+                state.transactions.push({ name: `AI Logged: ${text.replace(/\d+/g, '').trim() || 'Expense'}`, amount: amount, icon: "🤖", time: "Just now" });
                 updateUI();
                 botReply = `Logged <b>${amount} NTD</b>. Your wallet has ${state.wallet.toLocaleString()} NTD left.`;
             } else if (amount > state.wallet) {
@@ -319,6 +372,9 @@
     document.getElementById("chat-input").addEventListener("keypress", function(e) {
         if (e.key === "Enter") { e.preventDefault(); processChat(); }
     });
+
+    // Chạy UI lần đầu
+    updateUI();
 </script>
 
 </body>
