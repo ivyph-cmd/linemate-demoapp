@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LineMate - Full Functional App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .iphone-x {
+            width: 375px; height: 812px; background-color: #f3f4f6; border-radius: 40px;
+            box-shadow: 0 0 0 14px #0f0f0f, 0 0 0 15px #3a3a3a, 0 30px 60px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden; margin: auto; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .notch {
+            position: absolute; width: 210px; height: 30px; background-color: #0f0f0f;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; top: 0; left: 50%; transform: translateX(-50%); z-index: 50;
+        }
+        .status-bar { display: flex; justify-content: space-between; padding: 12px 25px 0 25px; font-size: 12px; font-weight: 600; z-index: 40; position: relative; color: white; }
+        .home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 130px; height: 5px; background-color: #d1d5db; border-radius: 10px; z-index: 50; }
+        ::-webkit-scrollbar { display: none; }
+        .fade-in { animation: fadeIn 0.3s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-line { background-color: #06C755; }
+        .text-line { color: #06C755; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-800 py-10">
+
+<div class="iphone-x flex flex-col">
+    <div class="notch"></div>
+    <div class="absolute top-0 w-full h-[250px] bg-[#06C755] rounded-b-[40px] z-0" id="bg-header"></div>
+    <div class="status-bar"><span>9:41</span><span class="flex gap-1">📶 🔋</span></div>
+
+    <div class="flex-1 relative overflow-hidden z-10 flex flex-col">
+        
+        <div id="screen-home" class="flex-1 overflow-y-auto pb-24 fade-in">
+            <div class="px-5 pt-4 text-white">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold">My</div>
+                        <div>
+                            <p class="text-[10px] opacity-80 uppercase tracking-wider">LinePay Wallet</p>
+                            <h1 class="text-2xl font-bold flex items-center gap-2">NT$ <span id="wallet-balance">15,000</span></h1>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 shadow-lg text-gray-800 flex justify-between items-center text-center">
+                    <div class="flex flex-col items-center gap-2 w-1/4 cursor-pointer">
+                        <div class="w-10 h-10 bg-green-50 text-[#06C755] rounded-xl flex items-center justify-center text-xl">💸</div>
+                        <span class="text-[10px] font-bold">Transfer</span>
+                    </div>
+                    <div onclick="switchScreen('lucky')" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer relative">
+                        <div class="absolute -top-2 -right-1 bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold">+4%</div>
+                        <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center text-xl">💰</div>
+                        <span class="text-[10px] font-bold">Invest</span>
+                    </div>
+                    <div onclick="switchScreen('chat')" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-xl">🤖</div>
+                        <span class="text-[10px] font-bold">AI Log</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 mt-6 space-y-5">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-sm text-gray-800">Emotion Check</h3>
+                        <p class="text-xs text-[#06C755] font-bold mt-1">Peace Fund: NT$ <span id="peace-balance">1,500</span></p>
+                    </div>
+                    <div class="flex gap-1 bg-gray-50 p-1 rounded-xl">
+                        <button onclick="handleMood('stress', 20)" class="w-8 h-8 rounded-lg hover:bg-white text-lg">😫</button>
+                        <button onclick="handleMood('normal', 0)" class="w-8 h-8 rounded-lg hover:bg-white text-lg">😐</button>
+                        <button onclick="handleMood('happy', 50)" class="w-8 h-8 rounded-lg hover:bg-white text-lg">🥰</button>
+                    </div>
+                </div>
+                <div id="mood-toast" class="hidden bg-green-50 text-[#06C755] border border-green-200 p-3 rounded-xl text-xs font-bold text-center"></div>
+
+                <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 flex items-start gap-3">
+                    <div class="text-2xl">📚</div>
+                    <div>
+                        <p class="text-sm font-bold text-blue-900">Weekly Digest</p>
+                        <p class="text-xs text-blue-700 mt-1">You've hit your TOCFL study goals and kept your budget tight. Great discipline!</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">Recent Transactions</h3>
+                    <div id="transaction-list" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 space-y-1">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-chat" class="absolute inset-0 flex flex-col bg-gray-50 hidden fade-in z-20">
+            <div class="bg-white pt-12 pb-3 px-5 shadow-sm flex items-center gap-3 z-30">
+                <button onclick="switchScreen('home')" class="text-gray-800">🔙</button>
+                <div>
+                    <h2 class="font-bold text-gray-800">LineMate AI</h2>
+                    <p class="text-[10px] text-[#06C755] font-medium">● Online</p>
+                </div>
+            </div>
+
+            <div id="chat-history" class="flex-1 p-5 overflow-y-auto space-y-4 text-sm pb-24">
+                <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-[85%] border border-gray-100 text-gray-700">
+                    Hi! Tell me what you bought today. E.g., "Chicken salad 120"
+                </div>
+            </div>
+
+            <div class="absolute bottom-0 w-full p-4 bg-white border-t border-gray-100 flex gap-2">
+                <input id="chat-input" type="text" placeholder="Type your expense..." class="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm outline-none">
+                <button onclick="processChat()" class="bg-line text-white rounded-full w-11 h-11 flex items-center justify-center shadow-md">⬆️</button>
+            </div>
+        </div>
+
+        <div id="screen-lucky" class="absolute inset-0 bg-gray-50 hidden fade-in z-20 overflow-y-auto pb-24">
+            <div class="bg-white pt-12 pb-3 px-5 flex justify-between items-center z-30">
+                <button onclick="switchScreen('home')" class="text-gray-800">🔙</button>
+                <h2 class="font-bold text-gray-800">Lucky Bag</h2>
+                <span class="text-xl">🎒</span>
+            </div>
+
+            <div class="p-5">
+                <div class="bg-[#1a1a1a] p-6 rounded-[24px] text-white shadow-xl relative">
+                    <div class="absolute top-0 right-0 bg-[#06C755] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">Up to 4%/yr </div>
+                    <p class="text-gray-400 text-xs font-medium">Total Assets</p>
+                    <h3 class="text-[32px] font-black mt-1">NT$ <span id="lucky-balance">88,046</span></h3>
+                    <p class="text-xs text-[#06C755] font-bold mt-2">Today's Profit: + NT$ 9.6</p>
+                </div>
+
+                <div class="mt-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <p class="text-sm font-bold text-gray-800 mb-2">Deposit from Wallet</p>
+                    <div class="flex gap-2">
+                        <input id="deposit-input" type="number" placeholder="Amount (NT$)" class="flex-1 bg-gray-100 rounded-xl px-4 py-2 text-sm outline-none">
+                        <button onclick="handleDeposit()" class="bg-line text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md">Deposit</button>
+                    </div>
+                    <p id="deposit-msg" class="text-xs text-red-500 font-medium mt-2 hidden"></p>
+                </div>
+
+                <h4 class="font-bold text-gray-800 mt-6 mb-3">AI Portfolios Rebalancing [cite: 178]</h4>
+                <div class="space-y-3">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl">📈</div>
+                            <div><p class="font-bold text-sm">Stock Investment</p><p class="text-[10px] text-gray-400">Maximize profit</p></div>
+                        </div>
+                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2 py-1 rounded font-bold">Active</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl">🐖</div>
+                            <div><p class="font-bold text-sm">Savings</p><p class="text-[10px] text-gray-400">From just one share</p></div>
+                        </div>
+                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2 py-1 rounded font-bold">Active</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
+                        <div class="flex items-center gap-3">
+                            <div class="text-2xl">🚀</div>
+                            <div><p class="font-bold text-sm">Growth</p><p class="text-[10px] text-gray-400">Long-term compound</p></div>
+                        </div>
+                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2 py-1 rounded font-bold">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="absolute bottom-0 w-full bg-white border-t border-gray-100 pb-5 pt-3 px-8 flex justify-between items-center z-40">
+        <button onclick="switchScreen('home')" id="nav-home" class="flex flex-col items-center gap-1 text-[#06C755]">
+            <span class="text-xl">🏠</span><span class="text-[9px] font-bold">Home</span>
+        </button>
+        <button class="flex flex-col items-center gap-1 text-gray-400 opacity-50"><span class="text-xl">📊</span><span class="text-[9px] font-bold">History</span></button>
+        <button onclick="switchScreen('chat')" class="relative -top-5 w-14 h-14 bg-[#06C755] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200 border-4 border-white"><span class="text-2xl">🤖</span></button>
+        <button class="flex flex-col items-center gap-1 text-gray-400 opacity-50"><span class="text-xl">🎁</span><span class="text-[9px] font-bold">Rewards</span></button>
+        <button class="flex flex-col items-center gap-1 text-gray-400 opacity-50"><span class="text-xl">👤</span><span class="text-[9px] font-bold">Account</span></button>
+    </div>
+    <div class="home-indicator"></div>
+</div>
+
+<script>
+    // --- STATE MANAGEMENT (Toàn bộ dữ liệu thật của App) ---
+    let state = {
+        wallet: 15000,
+        peaceFund: 1500,
+        luckyBag: 88046,
+        transactions: [
+            { name: "Shopee Checkout", amount: 450, icon: "🛒", time: "Today, 14:30" },
+            { name: "Taipei Metro", amount: 25, icon: "🚇", time: "Today, 08:15" }
+        ]
+    };
+
+    // --- UI UPDATER (Hàm cập nhật giao diện khi dữ liệu thay đổi) ---
+    function updateUI() {
+        document.getElementById('wallet-balance').innerText = state.wallet.toLocaleString();
+        document.getElementById('peace-balance').innerText = state.peaceFund.toLocaleString();
+        document.getElementById('lucky-balance').innerText = state.luckyBag.toLocaleString();
+
+        const txList = document.getElementById('transaction-list');
+        txList.innerHTML = '';
+        state.transactions.slice().reverse().forEach(tx => {
+            txList.innerHTML += `
+                <div class="flex items-center justify-between p-3 border-b border-gray-50">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg">${tx.icon}</div>
+                        <div><p class="text-sm font-bold text-gray-800">${tx.name}</p><p class="text-[10px] text-gray-400">${tx.time}</p></div>
+                    </div>
+                    <span class="text-sm font-bold text-gray-800">- NT$ ${tx.amount.toLocaleString()}</span>
+                </div>
+            `;
+        });
+    }
+
+    // Khởi tạo giao diện lần đầu
+    updateUI();
+
+    // --- NAVIGATION LOGIC ---
+    function switchScreen(screen) {
+        ['home', 'chat', 'lucky'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
+        document.getElementById(`screen-${screen}`).classList.remove('hidden');
+        document.getElementById('bg-header').style.display = screen === 'home' ? 'block' : 'none';
+        document.getElementById('nav-home').className = `flex flex-col items-center gap-1 ${screen === 'home' ? 'text-[#06C755]' : 'text-gray-400 opacity-50'}`;
+    }
+
+    // --- INTERACTIVE FEATURES ---
+
+    // 1. Emotion Check 
+    function handleMood(mood, amount) {
+        if (state.wallet >= amount && amount > 0) {
+            state.wallet -= amount;
+            state.peaceFund += amount;
+            updateUI();
+        }
+        const toast = document.getElementById('mood-toast');
+        toast.classList.remove('hidden');
+        toast.innerText = amount > 0 ? `+${amount} NTD auto-saved to Peace Fund!` : "Balance is key. Have a good day!";
+        setTimeout(() => toast.classList.add('hidden'), 3000);
+    }
+
+    // 2. Lucky Bag Deposit
+    function handleDeposit() {
+        const input = document.getElementById('deposit-input');
+        const msg = document.getElementById('deposit-msg');
+        const amount = parseInt(input.value);
+
+        if (isNaN(amount) || amount <= 0) {
+            msg.innerText = "Please enter a valid amount.";
+            msg.classList.remove('hidden');
+            return;
+        }
+        if (amount > state.wallet) {
+            msg.innerText = "Insufficient wallet balance!";
+            msg.classList.remove('hidden');
+            return;
+        }
+
+        // Thực hiện giao dịch
+        state.wallet -= amount;
+        state.luckyBag += amount;
+        
+        // Thêm vào lịch sử giao dịch
+        state.transactions.push({ name: "Transfer to Lucky Bag", amount: amount, icon: "💰", time: "Just now" });
+        
+        updateUI();
+        input.value = '';
+        msg.classList.add('hidden');
+        
+        // Báo thành công
+        alert(`Successfully deposited NT$ ${amount.toLocaleString()} to Lucky Bag!`);
+    }
+
+    // 3. AI Chat Logic [cite: 116, 131, 136]
+    function processChat() {
+        const input = document.getElementById('chat-input');
+        const history = document.getElementById('chat-history');
+        const text = input.value.trim();
+        if(!text) return;
+
+        // User Message
+        history.innerHTML += `<div class="flex justify-end fade-in"><div class="bg-[#06C755] text-white p-3 rounded-2xl rounded-tr-none max-w-[80%]">${text}</div></div>`;
+        input.value = '';
+        history.scrollTop = history.scrollHeight;
+
+        // Trích xuất số tiền từ tin nhắn (Regex tìm số)
+        const matchAmount = text.match(/\d+/);
+        const amount = matchAmount ? parseInt(matchAmount[0]) : 0;
+
+        setTimeout(() => {
+            let botReply = '';
+            
+            // Logic 1: Báo động bảo mật (Security Block) 
+            if (amount > 10000) {
+                botReply = `<span class="text-red-600 font-bold">⚠️ Blocked (99.99% Accuracy) </span><br>NT$ ${amount.toLocaleString()} is unusually high. Transaction frozen.`;
+            } 
+            // Logic 2: Trừ tiền bình thường nếu số hợp lệ và đủ số dư
+            else if (amount > 0 && amount <= state.wallet) {
+                state.wallet -= amount;
+                state.transactions.push({ name: "AI Logged Expense", amount: amount, icon: "🤖", time: "Just now" });
+                updateUI();
+                
+                botReply = `Logged <b>${amount} NTD</b>. Your wallet has ${state.wallet.toLocaleString()} NTD left.<br><br>💡 Staying in a budget deficit is just as good for your goals as a caloric deficit! Keep it up.`;
+            } 
+            // Logic 3: Không đủ tiền
+            else if (amount > state.wallet) {
+                botReply = `Failed to log. Your wallet only has NT$ ${state.wallet.toLocaleString()}.`;
+            } 
+            // Logic 4: Không tìm thấy số tiền
+            else {
+                botReply = "I couldn't detect an amount. Please type something like 'Coffee 60'.";
+            }
+
+            history.innerHTML += `
+                <div class="flex items-end gap-2 justify-start fade-in mt-4">
+                    <div class="w-8 h-8 bg-[#06C755] text-white rounded-full flex items-center justify-center text-xs shrink-0">🤖</div>
+                    <div class="bg-white border-gray-100 text-gray-700 p-3 rounded-2xl rounded-bl-none max-w-[80%] border">${botReply}</div>
+                </div>`;
+            history.scrollTop = history.scrollHeight;
+        }, 600);
+    }
+
+    // Bắt sự kiện Enter khi chat
+    document.getElementById("chat-input").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            processChat();
+        }
+    });
+</script>
+
+</body>
+</html>
