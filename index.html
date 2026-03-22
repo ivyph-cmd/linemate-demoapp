@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LineMate - Ultimate iOS Experience</title>
+    <title>LineMate - Dynamic Island Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
-        /* Tích hợp Font Apple SF Pro chính gốc */
         @import url('https://fonts.cdnfonts.com/css/sf-pro-display');
         
         :root {
@@ -30,24 +29,30 @@
             position: relative; overflow: hidden;
         }
         
-        .notch {
-            position: absolute; width: 185px; height: 30px; background-color: #0f0f0f;
-            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; top: 0; left: 50%; transform: translateX(-50%); z-index: 100;
+        /* ================= DYNAMIC ISLAND (THAY THẾ NOTCH) ================= */
+        .dynamic-island {
+            position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 35px; background-color: #000; border-radius: 24px; z-index: 100;
+            display: flex; justify-content: flex-end; items-center; padding-right: 12px; align-items: center;
+            box-shadow: 0 0 1px rgba(255,255,255,0.1);
+        }
+        /* Giả lập ống kính Camera bên trong Dynamic Island */
+        .dynamic-island::after {
+            content: ''; width: 11px; height: 11px; border-radius: 50%; background: #111;
+            box-shadow: inset -1px -1px 2px rgba(255,255,255,0.15), inset 1px 1px 2px rgba(0,0,0,0.5);
         }
 
         .home-indicator {
             position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; background-color: #000; border-radius: 100px; z-index: 100;
         }
 
-        /* Ẩn thanh cuộn nhưng bật tính năng cuộn mượt và bounce của iOS */
         .ios-scroll {
             overflow-y: auto; overflow-x: hidden;
             -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: auto; /* Hiệu ứng bounce */
+            overscroll-behavior-y: auto;
         }
         .ios-scroll::-webkit-scrollbar { display: none; }
 
-        /* Animation chuyển cảnh chuẩn iOS (Slide In/Out) */
         .screen-container { position: absolute; inset: 0; display: none; flex-direction: column; }
         .screen-container.active { display: flex; }
         
@@ -60,7 +65,6 @@
         .fade-in { animation: fadeIn 0.3s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Hiệu ứng kính mờ (Glassmorphism / Vibrancy) */
         .glass-header {
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
@@ -72,7 +76,6 @@
             border-top: 0.5px solid rgba(0, 0, 0, 0.1);
         }
 
-        /* SVG Icon Class */
         .sf-icon { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
         .sf-icon-filled { fill: currentColor; stroke: none; }
         
@@ -82,19 +85,20 @@
 <body>
 
 <div class="iphone-x">
-    <div class="notch"></div>
+    <div class="dynamic-island"></div>
+    
     <div class="absolute top-0 w-full h-[250px] bg-[#06C755] transition-all duration-400" id="bg-header"></div>
     
-    <div id="status-bar-text" class="absolute top-0 w-full pt-[14px] px-7 flex justify-between items-center text-[15px] font-semibold z-50 text-white transition-colors duration-300 pointer-events-none">
+    <div id="status-bar-text" class="absolute top-0 w-full pt-[18px] px-[26px] flex justify-between items-center text-[15px] font-semibold z-50 text-white transition-colors duration-300 pointer-events-none">
         <div class="ml-1 tracking-tight">9:41</div>
-        <div class="flex items-center gap-[6px] mr-1">
+        <div class="flex items-center gap-[6px]">
             <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="1" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13" y="0" width="3" height="12" rx="1"/></svg>
             <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/><path d="M11.8 6.3c-1.8-1.7-4.8-1.7-6.6 0l1.1 1.2c1.2-1 3.2-1 4.4 0l1.1-1.2z"/><path d="M15 3.3c-3.6-3-9.4-3-13 0l1.1 1.2c2.9-2.4 7.9-2.4 10.8 0l1.1-1.2z"/></svg>
             <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor"/><path d="M24 4V8" stroke="currentColor" stroke-linecap="round"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/></svg>
         </div>
     </div>
 
-    <div id="screen-home" class="screen-container active ios-scroll pb-[100px] pt-12">
+    <div id="screen-home" class="screen-container active ios-scroll pb-[100px] pt-[60px]">
         <div class="px-5 pt-2 text-white relative z-10">
             <div class="flex justify-between items-center mb-5">
                 <div class="flex items-center gap-3">
@@ -153,8 +157,8 @@
         </div>
     </div>
 
-    <div id="screen-chat" class="screen-container ios-scroll bg-gray-50 pt-10">
-        <div class="glass-header pt-3 pb-3 px-4 flex items-center gap-2 z-30 sticky top-0">
+    <div id="screen-chat" class="screen-container ios-scroll bg-gray-50 pt-[52px]">
+        <div class="glass-header pt-2 pb-3 px-4 flex items-center gap-2 z-30 sticky top-0">
             <button onclick="switchScreen('home')" class="text-[#06C755] flex items-center p-1">
                 <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
             </button>
@@ -188,8 +192,8 @@
         </div>
     </div>
 
-    <div id="screen-history" class="screen-container ios-scroll bg-gray-50 pb-[100px] pt-12">
-        <div class="glass-header pb-3 px-5 flex justify-between items-center z-30 sticky top-0">
+    <div id="screen-history" class="screen-container ios-scroll bg-gray-50 pb-[100px] pt-[52px]">
+        <div class="glass-header pt-2 pb-3 px-5 flex justify-between items-center z-30 sticky top-0">
             <h2 class="font-bold text-gray-900 text-[28px] tracking-tight">History</h2>
             <div class="w-8 h-8 bg-gray-200 rounded-full flex justify-center items-center active:bg-gray-300 transition">
                 <svg class="sf-icon w-4 h-4 text-gray-700" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
@@ -210,8 +214,8 @@
         </div>
     </div>
 
-    <div id="screen-lucky" class="screen-container ios-scroll bg-gray-50 pb-[100px] pt-10">
-        <div class="glass-header pt-3 pb-3 px-4 flex items-center z-30 sticky top-0">
+    <div id="screen-lucky" class="screen-container ios-scroll bg-gray-50 pb-[100px] pt-[52px]">
+        <div class="glass-header pt-2 pb-3 px-4 flex items-center z-30 sticky top-0">
             <button onclick="switchScreen('home')" class="text-[#06C755] flex items-center p-1 absolute">
                 <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
             </button>
@@ -263,7 +267,7 @@
     </div>
 
     <div id="transfer-modal" class="hidden absolute inset-0 bg-black/40 z-[100] flex items-center justify-center p-5 fade-in backdrop-blur-sm">
-        <div class="bg-white/95 backdrop-blur-xl rounded-[32px] p-6 w-full max-w-[320px] shadow-2xl transform scale-100 transition-transform">
+        <div class="bg-white/95 backdrop-blur-xl rounded-[32px] p-6 w-full max-w-[320px] shadow-2xl">
             <div class="flex justify-between items-center mb-5">
                 <h3 class="font-bold text-[20px] text-gray-900 tracking-tight">Send Money</h3>
                 <button onclick="closeTransferModal()" class="bg-gray-100 text-gray-500 rounded-full p-1.5 active:bg-gray-200 transition">
@@ -276,7 +280,7 @@
         </div>
     </div>
 
-    <div id="system-toast" class="hidden absolute top-[50px] left-1/2 transform -translate-x-1/2 w-[340px] glass-nav text-gray-900 px-5 py-3.5 rounded-[20px] text-[14px] font-semibold z-[100] shadow-[0_10px_20px_rgba(0,0,0,0.1)] fade-in text-center break-words whitespace-normal leading-snug border border-gray-200">
+    <div id="system-toast" class="hidden absolute top-[60px] left-1/2 transform -translate-x-1/2 w-[340px] glass-nav text-gray-900 px-5 py-3.5 rounded-[20px] text-[14px] font-semibold z-[100] shadow-[0_10px_20px_rgba(0,0,0,0.1)] fade-in text-center break-words whitespace-normal leading-snug border border-gray-200">
         Message
     </div>
 
@@ -322,7 +326,6 @@
     let chartInstance = null;
     let toastTimeout = null;
 
-    // Bộ SVG Icon cho lịch sử giao dịch
     const catIcons = {
         shopping: '<svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>',
         transport: '<svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15h.01M16 15h.01M4 8h16M10 3v5m4-5v5"/></svg>',
@@ -392,7 +395,6 @@
         }
     }
 
-    // Biến lưu màn hình hiện tại để làm animation trượt
     let currentScreen = 'home';
 
     function switchScreen(screen) {
@@ -401,18 +403,14 @@
         const oldEl = document.getElementById(`screen-${currentScreen}`);
         const newEl = document.getElementById(`screen-${screen}`);
         
-        // Ẩn tất cả class animation
         oldEl.classList.remove('slide-in-right', 'slide-out-left', 'fade-in');
         newEl.classList.remove('slide-in-right', 'slide-out-left', 'fade-in');
 
-        // Logic Slide Animation
         if(screen !== 'home' && currentScreen === 'home') {
             oldEl.classList.add('slide-out-left');
-            newEl.classList.add('slide-in-right');
-            newEl.classList.add('active');
+            newEl.classList.add('slide-in-right', 'active');
             setTimeout(() => { oldEl.classList.remove('active', 'slide-out-left'); }, 400);
         } else if (screen === 'home' && currentScreen !== 'home') {
-            // Quay về Home thì fade in cho nhẹ nhàng
             oldEl.classList.remove('active');
             newEl.classList.add('active', 'fade-in');
         } else {
@@ -422,7 +420,6 @@
 
         currentScreen = screen;
         
-        // Cập nhật màu Status Bar
         const headerBg = document.getElementById('bg-header');
         const statusBar = document.getElementById('status-bar-text');
         if(screen === 'home') {
@@ -435,7 +432,6 @@
             statusBar.classList.add('text-gray-900');
         }
         
-        // Đổi icon Nav Bottom (Nét đặc / Nét mảnh)
         const iconHome = document.getElementById('icon-home');
         const iconHistory = document.getElementById('icon-history');
         
