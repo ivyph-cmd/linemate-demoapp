@@ -71,9 +71,9 @@
                         <p class="text-xs text-[#06C755] font-bold mt-1">Peace Fund: NT$ <span id="peace-balance">1,500</span></p>
                     </div>
                     <div class="flex gap-1 bg-gray-50 p-1 rounded-xl">
-                        <button onclick="handleMood('stress', 20)" class="w-8 h-8 rounded-lg hover:bg-white text-lg">😫</button>
-                        <button onclick="handleMood('normal', 0)" class="w-8 h-8 rounded-lg hover:bg-white text-lg">😐</button>
-                        <button onclick="handleMood('happy', 50)" class="w-8 h-8 rounded-lg hover:bg-white text-lg">🥰</button>
+                        <button onclick="handleMood('stress', 20)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">😫</button>
+                        <button onclick="handleMood('normal', 0)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">😐</button>
+                        <button onclick="handleMood('happy', 50)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">🥰</button>
                     </div>
                 </div>
 
@@ -99,13 +99,13 @@
 
             <div id="chat-history" class="flex-1 p-5 overflow-y-auto space-y-4 text-sm pb-[150px]">
                 <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-[85%] border border-gray-100 text-gray-700">
-                    Hi! Tell me what you bought today. E.g., "Food 120"
+                    Hi! Tell me what you bought today. E.g., "Bus 25" or "Lunch 120"
                 </div>
             </div>
 
             <div class="absolute bottom-[80px] w-full p-4 bg-white border-t border-gray-100 flex gap-2 z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
                 <input id="chat-input" type="text" placeholder="Type your expense..." class="flex-1 bg-gray-100 rounded-full px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-[#06C755]/50">
-                <button onclick="processChat()" class="bg-line text-white rounded-full w-11 h-11 flex items-center justify-center shadow-md">⬆️</button>
+                <button onclick="processChat()" class="bg-line text-white rounded-full w-11 h-11 flex items-center justify-center shadow-md active:scale-95 transition">⬆️</button>
             </div>
         </div>
 
@@ -130,35 +130,58 @@
         </div>
 
         <div id="screen-lucky" class="absolute inset-0 bg-gray-50 hidden fade-in z-20 overflow-y-auto pb-[100px]">
-            <div class="bg-white pt-12 pb-3 px-5 flex justify-between items-center z-30">
+            <div class="bg-white pt-12 pb-3 px-5 flex justify-between items-center z-30 shadow-sm sticky top-0">
                 <button onclick="switchScreen('home')" class="text-gray-800 text-xl">🔙</button>
-                <h2 class="font-bold text-gray-800">Lucky Bag</h2>
+                <h2 class="font-bold text-gray-800 text-lg">Lucky Bag</h2>
                 <span class="text-xl">🎒</span>
             </div>
 
             <div class="p-5">
-                <div class="bg-[#1a1a1a] p-6 rounded-[24px] text-white shadow-xl relative">
-                    <div class="absolute top-0 right-0 bg-[#06C755] text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl">Up to 4%/yr</div>
-                    <p class="text-gray-400 text-xs font-medium">Total Assets</p>
-                    <h3 class="text-[32px] font-black mt-1">NT$ <span id="lucky-balance">88,046</span></h3>
+                <div class="bg-[#1a1a1a] p-8 rounded-[28px] text-white shadow-xl relative text-center border border-gray-800">
+                    <div class="absolute top-0 right-0 bg-[#06C755] text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-[16px] rounded-tr-[28px] tracking-wide">
+                        UP TO 4%/YR
+                    </div>
                     
-                    <div class="flex gap-4 mt-3 pt-3 border-t border-gray-700">
-                        <div>
-                            <p class="text-[10px] text-gray-400">Total Profit</p>
-                            <p class="text-sm text-[#06C755] font-bold">+ NT$ 1,240</p>
-                        </div>
-                        <div>
-                            <p class="text-[10px] text-gray-400">Today's Profit</p>
-                            <p class="text-sm text-[#06C755] font-bold">+ NT$ 9.6</p>
-                        </div>
+                    <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mt-2 mb-1">Total Assets</p>
+                    <h3 class="text-[40px] font-black tracking-tight mb-2 leading-none">NT$ <span id="lucky-balance">88,046</span></h3>
+                    
+                    <p class="text-[#06C755] font-bold text-sm flex justify-center items-center gap-1">
+                        <span>▲</span> NT$ 1,240 <span class="text-gray-400 font-medium text-xs ml-1">(Total Profit)</span>
+                    </p>
+                    <p class="text-gray-400 text-[10px] font-medium mt-1.5">
+                        Today's Profit: + NT$ 9.6
+                    </p>
+                </div>
+
+                <div class="mt-6 bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+                    <p class="text-sm font-bold text-gray-800 mb-3">Deposit to Lucky Bag</p>
+                    <div class="flex gap-2">
+                        <input id="deposit-input" type="number" placeholder="Amount (NT$)" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#06C755]">
+                        <button onclick="handleDeposit()" class="bg-line text-white font-bold px-5 py-3 rounded-xl text-sm shadow-md active:scale-95 transition">Deposit</button>
                     </div>
                 </div>
 
-                <div class="mt-6 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                    <p class="text-sm font-bold text-gray-800 mb-2">Deposit from Wallet</p>
-                    <div class="flex gap-2">
-                        <input id="deposit-input" type="number" placeholder="Amount (NT$)" class="flex-1 bg-gray-100 rounded-xl px-4 py-2 text-sm outline-none">
-                        <button onclick="handleDeposit()" class="bg-line text-white font-bold px-4 py-2 rounded-xl text-sm shadow-md">Deposit</button>
+                <h4 class="font-bold text-gray-800 mt-8 mb-3 px-1">AI Portfolios Rebalancing</h4>
+                <div class="space-y-3">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-orange-50 rounded-full flex justify-center items-center text-xl">📈</div>
+                            <div>
+                                <p class="font-bold text-sm text-gray-800">Stock Investment</p>
+                                <p class="text-[10px] text-gray-400">Maximize profit (High Risk)</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2.5 py-1 rounded-full font-bold">Active</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-50 rounded-full flex justify-center items-center text-xl">🐖</div>
+                            <div>
+                                <p class="font-bold text-sm text-gray-800">Stable Savings</p>
+                                <p class="text-[10px] text-gray-400">Low Risk, Daily Interest</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2.5 py-1 rounded-full font-bold">Active</span>
                     </div>
                 </div>
             </div>
@@ -166,14 +189,14 @@
     </div>
 
     <div id="transfer-modal" class="hidden absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-5 fade-in">
-        <div class="bg-white rounded-3xl p-6 w-full max-w-[300px]">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-[300px] shadow-2xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg text-gray-800">Send Money</h3>
-                <button onclick="closeTransferModal()" class="text-gray-400 font-bold text-lg">✕</button>
+                <button onclick="closeTransferModal()" class="text-gray-400 hover:text-gray-800 font-bold text-lg transition">✕</button>
             </div>
-            <input id="transfer-id" type="text" placeholder="Line ID or Phone Number" class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none mb-3">
-            <input id="transfer-amount" type="number" placeholder="Amount (NT$)" class="w-full bg-gray-100 rounded-xl px-4 py-3 text-sm outline-none mb-5">
-            <button onclick="submitTransfer()" class="w-full bg-line text-white font-bold py-3 rounded-xl shadow-md">Send Now</button>
+            <input id="transfer-id" type="text" placeholder="Line ID or Phone Number" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-3 focus:border-[#06C755]">
+            <input id="transfer-amount" type="number" placeholder="Amount (NT$)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-5 focus:border-[#06C755]">
+            <button onclick="submitTransfer()" class="w-full bg-line text-white font-bold py-3.5 rounded-xl shadow-md active:scale-95 transition">Send Now</button>
         </div>
     </div>
 
@@ -188,7 +211,7 @@
         <button onclick="switchScreen('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400 pb-4">
             <span class="text-xl">📊</span><span class="text-[9px] font-bold">History</span>
         </button>
-        <button onclick="switchScreen('chat')" class="relative -top-4 w-14 h-14 bg-[#06C755] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200 border-4 border-white">
+        <button onclick="switchScreen('chat')" class="relative -top-4 w-14 h-14 bg-[#06C755] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200 border-4 border-white active:scale-95 transition">
             <span class="text-2xl">🤖</span>
         </button>
         <button onclick="showToast('Rewards page is coming soon in Phase 2!')" class="flex flex-col items-center gap-1 text-gray-400 pb-4">
@@ -207,9 +230,9 @@
         peaceFund: 1500,
         luckyBag: 88046,
         transactions: [
-            { name: "Shopee Checkout", amount: 450, icon: "🛒", time: "Today, 14:30" },
+            { name: "Shopee Checkout", amount: 450, icon: "🛍️", time: "Today, 14:30" },
             { name: "Taipei Metro", amount: 25, icon: "🚇", time: "Today, 08:15" },
-            { name: "Lunch Combo", amount: 150, icon: "🥗", time: "Yesterday" }
+            { name: "Lunch Combo", amount: 150, icon: "🍔", time: "Yesterday" }
         ]
     };
 
@@ -230,7 +253,7 @@
         
         txs.forEach((tx, index) => {
             const html = `
-                <div class="flex items-center justify-between p-3 border-b border-gray-50">
+                <div class="flex items-center justify-between p-3 border-b border-gray-50 hover:bg-gray-50 transition">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg shadow-sm border border-gray-200">${tx.icon}</div>
                         <div><p class="text-sm font-bold text-gray-800 capitalize">${tx.name}</p><p class="text-[10px] text-gray-400">${tx.time}</p></div>
@@ -381,8 +404,8 @@
 
             history.innerHTML += `
                 <div class="flex items-end gap-2 justify-start fade-in mt-4">
-                    <div class="w-8 h-8 bg-[#06C755] text-white rounded-full flex items-center justify-center text-xs shrink-0">🤖</div>
-                    <div class="bg-white border-gray-100 text-gray-700 p-3 rounded-2xl rounded-bl-none max-w-[80%] border">${botReply}</div>
+                    <div class="w-8 h-8 bg-[#06C755] text-white rounded-full flex items-center justify-center text-xs shrink-0 shadow-sm border border-gray-100">🤖</div>
+                    <div class="bg-white border-gray-100 text-gray-700 p-3 rounded-2xl rounded-bl-none max-w-[80%] border shadow-sm">${botReply}</div>
                 </div>`;
             history.scrollTop = history.scrollHeight;
         }, 600);
