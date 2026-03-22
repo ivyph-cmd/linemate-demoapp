@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LineMate - iOS Style Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <style>
+        .iphone-x {
+            width: 375px; height: 812px; background-color: #f3f4f6; border-radius: 40px;
+            box-shadow: 0 0 0 14px #0f0f0f, 0 0 0 15px #3a3a3a, 0 30px 60px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden; margin: auto; 
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+        }
+        .notch {
+            position: absolute; width: 210px; height: 30px; background-color: #0f0f0f;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; top: 0; left: 50%; transform: translateX(-50%); z-index: 60;
+        }
+        .status-bar { display: flex; justify-content: space-between; padding: 12px 25px 0 25px; font-size: 12px; font-weight: 600; z-index: 40; position: relative; color: white; }
+        .home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 130px; height: 5px; background-color: #d1d5db; border-radius: 10px; z-index: 60; }
+        ::-webkit-scrollbar { display: none; }
+        .fade-in { animation: fadeIn 0.3s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .bg-line { background-color: #06C755; }
+        .text-line { color: #06C755; }
+        
+        /* Hiệu ứng kính mờ chuẩn iOS */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-800 py-10">
+
+<div class="iphone-x flex flex-col">
+    <div class="notch"></div>
+    <div class="absolute top-0 w-full h-[250px] bg-[#06C755] rounded-b-[40px] z-0" id="bg-header"></div>
+    <div class="status-bar"><span>9:41</span><span class="flex gap-1"><ion-icon name="cellular"></ion-icon> <ion-icon name="battery-full"></ion-icon></span></div>
+
+    <div class="flex-1 relative overflow-hidden z-10 flex flex-col">
+        
+        <div id="screen-home" class="absolute inset-0 overflow-y-auto pb-[100px] fade-in">
+            <div class="px-5 pt-4 text-white relative z-10">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold">My</div>
+                        <div>
+                            <p class="text-[10px] opacity-80 uppercase tracking-wider">LinePay Wallet</p>
+                            <h1 class="text-2xl font-bold flex items-center gap-2">NT$ <span id="wallet-balance">15,000</span></h1>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl p-4 shadow-lg text-gray-800 flex justify-between items-center text-center">
+                    <div onclick="openTransferModal()" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer">
+                        <div class="w-10 h-10 bg-green-50 text-[#06C755] rounded-xl flex items-center justify-center text-2xl"><ion-icon name="paper-plane-outline"></ion-icon></div>
+                        <span class="text-[10px] font-bold">Transfer</span>
+                    </div>
+                    <div onclick="switchScreen('lucky')" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer relative">
+                        <div class="absolute -top-2 -right-1 bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold">+4%</div>
+                        <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center text-2xl"><ion-icon name="briefcase-outline"></ion-icon></div>
+                        <span class="text-[10px] font-bold">Invest</span>
+                    </div>
+                    <div onclick="switchScreen('chat')" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer">
+                        <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-2xl"><ion-icon name="sparkles-outline"></ion-icon></div>
+                        <span class="text-[10px] font-bold">AI Log</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-5 mt-6 space-y-5">
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+                    <div>
+                        <h3 class="font-bold text-sm text-gray-800">Emotion Check</h3>
+                        <p class="text-xs text-[#06C755] font-bold mt-1">Peace Fund: NT$ <span id="peace-balance">1,500</span></p>
+                    </div>
+                    <div class="flex gap-1 bg-gray-50 p-1 rounded-xl">
+                        <button onclick="handleMood('stress', 20)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">😫</button>
+                        <button onclick="handleMood('normal', 0)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">😐</button>
+                        <button onclick="handleMood('happy', 50)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">🥰</button>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex justify-between items-end mb-3">
+                        <h3 class="font-bold text-gray-800">Recent Transactions</h3>
+                        <button onclick="switchScreen('history')" class="text-xs text-[#06C755] font-bold">View All</button>
+                    </div>
+                    <div id="transaction-list-home" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 space-y-1">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="screen-chat" class="absolute inset-0 flex flex-col bg-gray-50 hidden fade-in z-20">
+            <div class="bg-white pt-12 pb-3 px-5 shadow-sm flex items-center gap-3 z-30">
+                <button onclick="switchScreen('home')" class="text-gray-800 text-2xl flex items-center"><ion-icon name="chevron-back-outline"></ion-icon></button>
+                <div>
+                    <h2 class="font-bold text-gray-800">LineMate AI</h2>
+                    <p class="text-[10px] text-[#06C755] font-medium">● Online</p>
+                </div>
+            </div>
+
+            <div id="chat-history" class="flex-1 p-5 overflow-y-auto space-y-4 text-sm pb-[150px]">
+                <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm w-[85%] border border-gray-100 text-gray-700">
+                    Hi! Tell me what you bought today. E.g., "Bus 25" or "Lunch 120"
+                </div>
+            </div>
+
+            <div class="absolute bottom-[80px] w-full p-4 bg-white border-t border-gray-100 flex items-center gap-3 z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)]">
+                <div class="flex-1 bg-gray-100 rounded-full px-4 py-2 border border-gray-200 flex items-center">
+                    <input id="chat-input" type="text" placeholder="iMessage" class="w-full bg-transparent text-sm outline-none">
+                </div>
+                <button onclick="processChat()" class="bg-[#06C755] text-white rounded-full w-8 h-8 flex items-center justify-center active:scale-95 transition">
+                    <ion-icon name="arrow-up" class="text-lg font-bold"></ion-icon>
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-history" class="absolute inset-0 bg-gray-50 hidden fade-in z-20 overflow-y-auto pb-[100px]">
+            <div class="bg-white pt-12 pb-3 px-5 flex justify-between items-center z-30 shadow-sm sticky top-0">
+                <h2 class="font-bold text-gray-800 text-lg">Transaction History</h2>
+                <ion-icon name="stats-chart-outline" class="text-xl text-gray-800"></ion-icon>
+            </div>
+            <div class="p-5">
+                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-6 flex flex-col items-center">
+                    <h3 class="font-bold text-gray-800 mb-2 self-start">Expense Breakdown</h3>
+                    <p class="text-xs text-gray-400 self-start mb-4">Auto-categorized by AI</p>
+                    <div class="relative w-48 h-48">
+                        <canvas id="expenseChart"></canvas>
+                    </div>
+                </div>
+
+                <h3 class="font-bold text-gray-800 mb-3">All Transactions</h3>
+                <div id="transaction-list-full" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 space-y-1">
+                    </div>
+            </div>
+        </div>
+
+        <div id="screen-lucky" class="absolute inset-0 bg-gray-50 hidden fade-in z-20 overflow-y-auto pb-[100px]">
+            <div class="bg-white pt-12 pb-3 px-5 flex justify-between items-center z-30 shadow-sm sticky top-0">
+                <button onclick="switchScreen('home')" class="text-gray-800 text-2xl flex items-center"><ion-icon name="chevron-back-outline"></ion-icon></button>
+                <h2 class="font-bold text-gray-800 text-lg">Lucky Bag</h2>
+                <ion-icon name="bag-check-outline" class="text-xl text-gray-800"></ion-icon>
+            </div>
+
+            <div class="p-5">
+                <div class="bg-[#1a1a1a] p-8 rounded-[28px] text-white shadow-xl relative text-center border border-gray-800">
+                    <div class="absolute top-0 right-0 bg-[#06C755] text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-[16px] rounded-tr-[28px] tracking-wide">
+                        UP TO 4%/YR
+                    </div>
+                    
+                    <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mt-2 mb-1">Total Assets</p>
+                    <h3 class="text-[40px] font-black tracking-tight mb-2 leading-none">NT$ <span id="lucky-balance">88,046</span></h3>
+                    
+                    <p class="text-[#06C755] font-bold text-sm flex justify-center items-center gap-1">
+                        <ion-icon name="caret-up"></ion-icon> NT$ 1,240 <span class="text-gray-400 font-medium text-xs ml-1">(Total Profit)</span>
+                    </p>
+                    <p class="text-gray-400 text-[10px] font-medium mt-1.5">
+                        Today's Profit: + NT$ 9.6
+                    </p>
+                </div>
+
+                <div class="mt-6 bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+                    <p class="text-sm font-bold text-gray-800 mb-3">Deposit to Lucky Bag</p>
+                    <div class="flex gap-2">
+                        <input id="deposit-input" type="number" placeholder="Amount (NT$)" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#06C755]">
+                        <button onclick="handleDeposit()" class="bg-line text-white font-bold px-5 py-3 rounded-xl text-sm shadow-md active:scale-95 transition">Deposit</button>
+                    </div>
+                </div>
+
+                <h4 class="font-bold text-gray-800 mt-8 mb-3 px-1">AI Portfolios</h4>
+                <div class="space-y-3">
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-full flex justify-center items-center text-xl"><ion-icon name="bar-chart-outline"></ion-icon></div>
+                            <div>
+                                <p class="font-bold text-sm text-gray-800">Stock Investment</p>
+                                <p class="text-[10px] text-gray-400">Maximize profit</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2.5 py-1 rounded-full font-bold">Active</span>
+                    </div>
+                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex justify-center items-center text-xl"><ion-icon name="shield-checkmark-outline"></ion-icon></div>
+                            <div>
+                                <p class="font-bold text-sm text-gray-800">Stable Savings</p>
+                                <p class="text-[10px] text-gray-400">Low Risk, Daily Interest</p>
+                            </div>
+                        </div>
+                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2.5 py-1 rounded-full font-bold">Active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="transfer-modal" class="hidden absolute inset-0 bg-black/60 z-[100] flex items-center justify-center p-5 fade-in">
+        <div class="bg-white rounded-3xl p-6 w-full max-w-[300px] shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-gray-800">Send Money</h3>
+                <button onclick="closeTransferModal()" class="text-gray-400 hover:text-gray-800 font-bold text-2xl transition"><ion-icon name="close-circle-outline"></ion-icon></button>
+            </div>
+            <input id="transfer-id" type="text" placeholder="Line ID or Phone Number" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-3 focus:border-[#06C755]">
+            <input id="transfer-amount" type="number" placeholder="Amount (NT$)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-5 focus:border-[#06C755]">
+            <button onclick="submitTransfer()" class="w-full bg-line text-white font-bold py-3.5 rounded-xl shadow-md active:scale-95 transition">Send Now</button>
+        </div>
+    </div>
+
+    <div id="system-toast" class="hidden absolute top-14 left-1/2 transform -translate-x-1/2 w-[320px] glass-nav text-gray-800 px-4 py-3 rounded-2xl text-[13px] font-medium z-[100] shadow-lg fade-in text-center break-words whitespace-normal leading-snug border border-gray-200">
+        Message
+    </div>
+
+    <div class="absolute bottom-0 w-full h-[80px] glass-nav border-t border-gray-200 flex justify-between items-center px-8 z-50">
+        <button onclick="switchScreen('home')" id="nav-home" class="flex flex-col items-center gap-1 text-[#06C755] pb-4">
+            <ion-icon name="home" class="text-2xl"></ion-icon><span class="text-[9px] font-medium">Home</span>
+        </button>
+        <button onclick="switchScreen('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400 pb-4">
+            <ion-icon name="pie-chart-outline" class="text-2xl"></ion-icon><span class="text-[9px] font-medium">History</span>
+        </button>
+        <button onclick="switchScreen('chat')" class="relative -top-4 w-14 h-14 bg-[#06C755] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200 border-4 border-white active:scale-95 transition">
+            <ion-icon name="sparkles" class="text-2xl"></ion-icon>
+        </button>
+        <button onclick="showToast('Rewards page is coming soon!')" class="flex flex-col items-center gap-1 text-gray-400 pb-4">
+            <ion-icon name="gift-outline" class="text-2xl"></ion-icon><span class="text-[9px] font-medium">Rewards</span>
+        </button>
+        <button onclick="showToast('Account settings are under development.')" class="flex flex-col items-center gap-1 text-gray-400 pb-4">
+            <ion-icon name="person-outline" class="text-2xl"></ion-icon><span class="text-[9px] font-medium">Account</span>
+        </button>
+    </div>
+</div>
+
+<script>
+    let state = {
+        wallet: 15000,
+        peaceFund: 1500,
+        luckyBag: 88046,
+        transactions: [
+            { name: "Shopee Checkout", amount: 450, icon: "bag-handle-outline", time: "Today, 14:30" },
+            { name: "Taipei Metro", amount: 25, icon: "train-outline", time: "Today, 08:15" },
+            { name: "Lunch Combo", amount: 150, icon: "restaurant-outline", time: "Yesterday" }
+        ]
+    };
+
+    let chartInstance = null;
+    let toastTimeout = null;
+
+    function updateUI() {
+        document.getElementById('wallet-balance').innerText = state.wallet.toLocaleString();
+        document.getElementById('peace-balance').innerText = state.peaceFund.toLocaleString();
+        document.getElementById('lucky-balance').innerText = state.luckyBag.toLocaleString();
+
+        const txHome = document.getElementById('transaction-list-home');
+        const txFull = document.getElementById('transaction-list-full');
+        txHome.innerHTML = ''; txFull.innerHTML = '';
+        
+        let txs = state.transactions.slice().reverse();
+        
+        txs.forEach((tx, index) => {
+            const html = `
+                <div class="flex items-center justify-between p-3 border-b border-gray-50 hover:bg-gray-50 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-gray-50 text-gray-600 rounded-full flex items-center justify-center text-xl border border-gray-100">
+                            <ion-icon name="${tx.icon}"></ion-icon>
+                        </div>
+                        <div><p class="text-sm font-bold text-gray-800 capitalize">${tx.name}</p><p class="text-[10px] text-gray-400">${tx.time}</p></div>
+                    </div>
+                    <span class="text-sm font-bold text-gray-800">- NT$ ${tx.amount.toLocaleString()}</span>
+                </div>
+            `;
+            if(index < 3) txHome.innerHTML += html;
+            txFull.innerHTML += html;
+        });
+
+        updateChart();
+    }
+
+    function updateChart() {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        let categories = { "Food": 0, "Shopping": 0, "Transport": 0, "Invest/Transfer": 0, "Other": 0 };
+        
+        state.transactions.forEach(tx => {
+            let n = tx.name.toLowerCase();
+            if(n.match(/shopping|bag|pen|shopee|buy|shirt|clothes/) || tx.icon === 'bag-handle-outline') categories["Shopping"] += tx.amount;
+            else if(n.match(/bus|mrt|taxi|train|uber|grab|transport/) || tx.icon === 'train-outline') categories["Transport"] += tx.amount;
+            else if(n.match(/transfer|deposit|lucky/) || tx.icon === 'wallet-outline') categories["Invest/Transfer"] += tx.amount;
+            else if(n.match(/dinner|lunch|breakfast|food|coffee|drink|eat|salad/) || tx.icon === 'restaurant-outline') categories["Food"] += tx.amount;
+            else categories["Other"] += tx.amount;
+        });
+
+        const labels = Object.keys(categories).filter(k => categories[k] > 0);
+        const data = labels.map(k => categories[k]);
+        const colors = ['#06C755', '#FF9F40', '#36A2EB', '#9966FF', '#C9CBCF'];
+
+        if (chartInstance) {
+            chartInstance.data.labels = labels;
+            chartInstance.data.datasets[0].data = data;
+            chartInstance.update();
+        } else {
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: {size: 10} } } } }
+            });
+        }
+    }
+
+    function switchScreen(screen) {
+        ['home', 'chat', 'lucky', 'history'].forEach(s => {
+            document.getElementById(`screen-${s}`).classList.add('hidden');
+        });
+        document.getElementById(`screen-${screen}`).classList.remove('hidden');
+        document.getElementById('bg-header').style.display = screen === 'home' ? 'block' : 'none';
+        
+        // Cập nhật đổi icon đặc (filled) khi chọn trên thanh menu
+        const navItems = {
+            'home': { active: 'home', inactive: 'home-outline' },
+            'history': { active: 'pie-chart', inactive: 'pie-chart-outline' }
+        };
+
+        ['home', 'history'].forEach(s => {
+            const btn = document.getElementById(`nav-${s}`);
+            const icon = btn.querySelector('ion-icon');
+            if(screen === s) {
+                btn.className = 'flex flex-col items-center gap-1 text-[#06C755] pb-4';
+                icon.setAttribute('name', navItems[s].active);
+            } else {
+                btn.className = 'flex flex-col items-center gap-1 text-gray-400 pb-4';
+                icon.setAttribute('name', navItems[s].inactive);
+            }
+        });
+
+        if(screen === 'history') updateChart();
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('system-toast');
+        toast.innerText = message;
+        toast.classList.remove('hidden');
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => toast.classList.add('hidden'), 2500);
+    }
+
+    function openTransferModal() { document.getElementById('transfer-modal').classList.remove('hidden'); }
+    function closeTransferModal() { document.getElementById('transfer-modal').classList.add('hidden'); }
+    
+    function submitTransfer() {
+        const id = document.getElementById('transfer-id').value.trim();
+        const amount = parseInt(document.getElementById('transfer-amount').value);
+        if (!id || isNaN(amount) || amount <= 0) return showToast("Invalid ID or amount!");
+        if (amount > state.wallet) return showToast("Insufficient balance!");
+
+        state.wallet -= amount;
+        state.transactions.push({ name: `Transfer to ${id}`, amount: amount, icon: "paper-plane-outline", time: "Just now" });
+        updateUI(); closeTransferModal();
+        showToast(`Sent NT$ ${amount} to ${id}`);
+        document.getElementById('transfer-id').value = ''; document.getElementById('transfer-amount').value = '';
+    }
+
+    function handleMood(mood, amount) {
+        if (state.wallet >= amount && amount > 0) {
+            state.wallet -= amount; state.peaceFund += amount; updateUI();
+        }
+        showToast(amount > 0 ? `+${amount} NTD auto-saved to Peace Fund!` : "Balance is key. Have a good day!");
+    }
+
+    function handleDeposit() {
+        const amount = parseInt(document.getElementById('deposit-input').value);
+        if (isNaN(amount) || amount <= 0) return showToast("Invalid amount.");
+        if (amount > state.wallet) return showToast("Insufficient balance.");
+
+        state.wallet -= amount; state.luckyBag += amount;
+        state.transactions.push({ name: "Deposit to Lucky Bag", amount: amount, icon: "wallet-outline", time: "Just now" });
+        updateUI(); document.getElementById('deposit-input').value = '';
+        showToast(`Deposited NT$ ${amount} to Lucky Bag!`);
+    }
+
+    function processChat() {
+        const input = document.getElementById('chat-input');
+        const history = document.getElementById('chat-history');
+        const text = input.value.trim();
+        if(!text) return;
+
+        history.innerHTML += `<div class="flex justify-end fade-in"><div class="bg-[#06C755] text-white py-2 px-4 rounded-2xl rounded-tr-sm max-w-[80%]">${text}</div></div>`;
+        input.value = ''; history.scrollTop = history.scrollHeight;
+
+        const matchAmount = text.match(/\d+/);
+        const amount = matchAmount ? parseInt(matchAmount[0]) : 0;
+        
+        const cleanName = text.replace(/\d+/g, '').trim() || 'Expense';
+        const lowerText = cleanName.toLowerCase();
+        
+        let catIcon = "receipt-outline";
+        if (lowerText.match(/bus|mrt|taxi|train|uber|grab|transport/)) catIcon = "train-outline";
+        else if (lowerText.match(/dinner|lunch|breakfast|food|coffee|drink|eat|salad/)) catIcon = "restaurant-outline";
+        else if (lowerText.match(/shopping|bag|pen|shopee|buy|shirt|clothes/)) catIcon = "bag-handle-outline";
+        else if (lowerText.match(/transfer|deposit|lucky/)) catIcon = "wallet-outline";
+
+        setTimeout(() => {
+            let botReply = '';
+            if (amount > 10000) {
+                botReply = `<span class="text-red-600 font-bold">⚠️ Blocked (99.99% Security)</span><br>NT$ ${amount.toLocaleString()} is unusually high.`;
+            } else if (amount > 0 && amount <= state.wallet) {
+                state.wallet -= amount;
+                
+                state.transactions.push({ name: `AI Log: ${cleanName}`, amount: amount, icon: catIcon, time: "Just now" });
+                updateUI();
+                botReply = `Logged <b>${amount} NTD</b>. Your wallet has ${state.wallet.toLocaleString()} NTD left.`;
+            } else if (amount > state.wallet) {
+                botReply = `Failed. Your wallet only has NT$ ${state.wallet.toLocaleString()}.`;
+            } else {
+                botReply = "I couldn't detect an amount. E.g., 'Coffee 60'.";
+            }
+
+            history.innerHTML += `
+                <div class="flex items-end gap-2 justify-start fade-in mt-4">
+                    <div class="w-7 h-7 bg-[#06C755] text-white rounded-full flex items-center justify-center text-[10px] shrink-0 shadow-sm"><ion-icon name="sparkles"></ion-icon></div>
+                    <div class="bg-white border-gray-100 text-gray-800 py-2 px-4 rounded-2xl rounded-bl-sm max-w-[80%] border shadow-sm">${botReply}</div>
+                </div>`;
+            history.scrollTop = history.scrollHeight;
+        }, 600);
+    }
+
+    document.getElementById("chat-input").addEventListener("keypress", function(e) {
+        if (e.key === "Enter") { e.preventDefault(); processChat(); }
+    });
+
+    updateUI();
+</script>
+
+</body>
+</html>
