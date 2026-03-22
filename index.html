@@ -39,19 +39,24 @@
     <div class="notch"></div>
     <div class="absolute top-0 w-full h-[250px] bg-[#06C755] rounded-b-[40px] z-0 transition-all duration-300" id="bg-header"></div>
     
-    <div id="status-bar-text" class="absolute top-0 w-full pt-3.5 px-7 flex justify-between items-center text-[14px] font-semibold z-50 text-white transition-colors duration-300">
-        <div class="ml-1">9:41</div>
-        <div class="flex items-center gap-1.5 mr-1">
-            <svg class="w-4 h-3" viewBox="0 0 16 12" fill="currentColor">
-                <path d="M1 9h2.5v3H1zM5.5 6.5h2.5v5.5h-2.5zM10 3.5h2.5v8.5H10zM14.5 0h2.5v12h-2.5z"/>
+    <div id="status-bar-text" class="absolute top-0 w-full pt-[14px] px-7 flex justify-between items-center text-[15px] font-semibold z-50 text-white transition-colors duration-300">
+        <div class="ml-1 tracking-tight">9:41</div>
+        <div class="flex items-center gap-[6px] mr-1">
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor">
+                <rect x="1" y="8" width="3" height="4" rx="1"/>
+                <rect x="5" y="5" width="3" height="7" rx="1"/>
+                <rect x="9" y="3" width="3" height="9" rx="1"/>
+                <rect x="13" y="0" width="3" height="12" rx="1"/>
             </svg>
-            <svg class="w-4 h-3" viewBox="0 0 16 12" fill="currentColor">
-                <path d="M8 12a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm0-4.5c-1.5 0-2.8.5-3.8 1.4l1 1.2c.8-.7 1.8-1 2.8-1s2 .3 2.8 1l1-1.2c-1-1-2.4-1.4-3.8-1.4zm0-4c-2.6 0-5 1-6.8 2.6l1 1.2A8 8 0 018 5c2 0 4.1.8 5.8 2.3l1-1.2A9.9 9.9 0 008 3.5zm0-3.5C4.5 0 1.5 1.3-.7 3.3l1 1.2c2-1.8 4.7-3 7.7-3s5.7 1.2 7.7 3l1-1.2C14.5 1.3 11.5 0 8 0z"/>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor">
+                <path d="M8.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/>
+                <path d="M11.8 6.3c-1.8-1.7-4.8-1.7-6.6 0l1.1 1.2c1.2-1 3.2-1 4.4 0l1.1-1.2z"/>
+                <path d="M15 3.3c-3.6-3-9.4-3-13 0l1.1 1.2c2.9-2.4 7.9-2.4 10.8 0l1.1-1.2z"/>
             </svg>
-            <svg class="w-6 h-3" viewBox="0 0 24 12" fill="none" stroke="currentColor">
-                <rect x="1" y="1" width="20" height="10" rx="3" stroke-width="1"/>
-                <path d="M23 4v4" stroke-width="1.5" stroke-linecap="round"/>
-                <rect x="2.5" y="2.5" width="14" height="7" rx="1.5" fill="currentColor" stroke="none"/>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
+                <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor"/>
+                <path d="M24 4V8" stroke="currentColor" stroke-linecap="round"/>
+                <rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/>
             </svg>
         </div>
     </div>
@@ -224,7 +229,7 @@
         <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-6 w-full max-w-[300px] shadow-2xl">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="font-bold text-lg text-gray-800">Send Money</h3>
-                <button onclick="closeTransferModal()" class="text-gray-400 hover:text-gray-800 text-3xl transition flex"><ion-icon name="close-circle" mode="ios"></ion-icon></button>
+                <button onclick="closeTransferModal()" class="text-gray-400 hover:text-gray-800 text-2xl transition flex"><ion-icon name="close-circle" mode="ios"></ion-icon></button>
             </div>
             <input id="transfer-id" type="text" placeholder="Line ID or Phone Number" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-3 focus:border-[#06C755]">
             <input id="transfer-amount" type="number" placeholder="Amount (NT$)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-5 focus:border-[#06C755]">
@@ -340,7 +345,6 @@
         });
         document.getElementById(`screen-${screen}`).classList.remove('hidden');
         
-        // Đổi màu Status Bar Text
         const headerBg = document.getElementById('bg-header');
         const statusBar = document.getElementById('status-bar-text');
         if(screen === 'home') {
@@ -350,10 +354,9 @@
         } else {
             headerBg.style.display = 'none';
             statusBar.classList.remove('text-white');
-            statusBar.classList.add('text-gray-900');
+            statusBar.classList.add('text-black');
         }
         
-        // Cập nhật đổi icon đặc/mảnh
         const navItems = {
             'home': { active: 'home', inactive: 'home-outline' },
             'history': { active: 'pie-chart', inactive: 'pie-chart-outline' }
