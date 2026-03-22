@@ -3,261 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LineMate </title>
+    <title>LineMate - Ultimate iOS Experience</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
-    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     
     <style>
-        .iphone-x {
-            width: 375px; height: 812px; background-color: #f3f4f6; border-radius: 40px;
-            box-shadow: 0 0 0 14px #0f0f0f, 0 0 0 15px #3a3a3a, 0 30px 60px rgba(0,0,0,0.5);
-            position: relative; overflow: hidden; margin: auto; 
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-            letter-spacing: -0.01em;
+        /* Tích hợp Font Apple SF Pro chính gốc */
+        @import url('https://fonts.cdnfonts.com/css/sf-pro-display');
+        
+        :root {
+            --ios-green: #06C755;
+            --ios-gray-bg: #F2F2F7;
+            --ios-glass: rgba(255, 255, 255, 0.75);
         }
+
+        body {
+            background-color: #1c1c1e;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            margin: 0; font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .iphone-x {
+            width: 375px; height: 812px; background-color: var(--ios-gray-bg); border-radius: 44px;
+            box-shadow: 0 0 0 12px #0f0f0f, 0 0 0 14px #3a3a3a, 0 30px 60px rgba(0,0,0,0.5);
+            position: relative; overflow: hidden;
+        }
+        
         .notch {
             position: absolute; width: 210px; height: 30px; background-color: #0f0f0f;
-            border-bottom-left-radius: 15px; border-bottom-right-radius: 15px; top: 0; left: 50%; transform: translateX(-50%); z-index: 60;
+            border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; top: 0; left: 50%; transform: translateX(-50%); z-index: 100;
         }
-        .home-indicator { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 130px; height: 5px; background-color: #111; border-radius: 10px; z-index: 60; }
-        ::-webkit-scrollbar { display: none; }
-        .fade-in { animation: fadeIn 0.3s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .home-indicator {
+            position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; background-color: #000; border-radius: 100px; z-index: 100;
+        }
+
+        /* Ẩn thanh cuộn nhưng bật tính năng cuộn mượt và bounce của iOS */
+        .ios-scroll {
+            overflow-y: auto; overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: auto; /* Hiệu ứng bounce */
+        }
+        .ios-scroll::-webkit-scrollbar { display: none; }
+
+        /* Animation chuyển cảnh chuẩn iOS (Slide In/Out) */
+        .screen-container { position: absolute; inset: 0; display: none; flex-direction: column; }
+        .screen-container.active { display: flex; }
         
+        .slide-in-right { animation: slideInRight 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+        .slide-out-left { animation: slideOutLeft 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+        
+        @keyframes slideInRight { from { transform: translateX(100%); opacity: 1; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOutLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-30%); opacity: 0.5; } }
+        
+        .fade-in { animation: fadeIn 0.3s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Hiệu ứng kính mờ (Glassmorphism / Vibrancy) */
+        .glass-header {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+        }
         .glass-nav {
             background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            border-top: 0.5px solid rgba(0, 0, 0, 0.1);
         }
+
+        /* SVG Icon Class */
+        .sf-icon { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+        .sf-icon-filled { fill: currentColor; stroke: none; }
+        
+        button:active { opacity: 0.7; transform: scale(0.96); transition: all 0.1s ease; }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen bg-gray-800 py-10">
+<body>
 
-<div class="iphone-x flex flex-col">
+<div class="iphone-x">
     <div class="notch"></div>
-    <div class="absolute top-0 w-full h-[250px] bg-[#06C755] rounded-b-[40px] z-0 transition-all duration-300" id="bg-header"></div>
+    <div class="absolute top-0 w-full h-[250px] bg-[#06C755] transition-all duration-400" id="bg-header"></div>
     
-    <div id="status-bar-text" class="absolute top-0 w-full pt-[14px] px-7 flex justify-between items-center text-[15px] font-semibold z-50 text-white transition-colors duration-300">
+    <div id="status-bar-text" class="absolute top-0 w-full pt-[14px] px-7 flex justify-between items-center text-[15px] font-semibold z-50 text-white transition-colors duration-300 pointer-events-none">
         <div class="ml-1 tracking-tight">9:41</div>
         <div class="flex items-center gap-[6px] mr-1">
-            <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor">
-                <rect x="1" y="8" width="3" height="4" rx="1"/>
-                <rect x="5" y="5" width="3" height="7" rx="1"/>
-                <rect x="9" y="3" width="3" height="9" rx="1"/>
-                <rect x="13" y="0" width="3" height="12" rx="1"/>
-            </svg>
-            <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor">
-                <path d="M8.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/>
-                <path d="M11.8 6.3c-1.8-1.7-4.8-1.7-6.6 0l1.1 1.2c1.2-1 3.2-1 4.4 0l1.1-1.2z"/>
-                <path d="M15 3.3c-3.6-3-9.4-3-13 0l1.1 1.2c2.9-2.4 7.9-2.4 10.8 0l1.1-1.2z"/>
-            </svg>
-            <svg width="25" height="12" viewBox="0 0 25 12" fill="none">
-                <rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor"/>
-                <path d="M24 4V8" stroke="currentColor" stroke-linecap="round"/>
-                <rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/>
-            </svg>
+            <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="1" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="9" y="3" width="3" height="9" rx="1"/><rect x="13" y="0" width="3" height="12" rx="1"/></svg>
+            <svg width="17" height="12" viewBox="0 0 17 12" fill="currentColor"><path d="M8.5 11.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/><path d="M11.8 6.3c-1.8-1.7-4.8-1.7-6.6 0l1.1 1.2c1.2-1 3.2-1 4.4 0l1.1-1.2z"/><path d="M15 3.3c-3.6-3-9.4-3-13 0l1.1 1.2c2.9-2.4 7.9-2.4 10.8 0l1.1-1.2z"/></svg>
+            <svg width="25" height="12" viewBox="0 0 25 12" fill="none"><rect x="0.5" y="0.5" width="21" height="11" rx="3.5" stroke="currentColor"/><path d="M24 4V8" stroke="currentColor" stroke-linecap="round"/><rect x="2" y="2" width="18" height="8" rx="2" fill="currentColor"/></svg>
         </div>
     </div>
 
-    <div class="flex-1 relative overflow-hidden z-10 flex flex-col">
-        
-        <div id="screen-home" class="absolute inset-0 overflow-y-auto pb-[100px] fade-in pt-12">
-            <div class="px-5 pt-2 text-white relative z-10">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center font-bold text-sm">My</div>
-                        <div>
-                            <p class="text-[10px] opacity-80 uppercase tracking-wider font-semibold">LinePay Wallet</p>
-                            <h1 class="text-2xl font-bold flex items-center gap-2">NT$ <span id="wallet-balance">15,000</span></h1>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-4 shadow-lg text-gray-800 flex justify-between items-center text-center">
-                    <div onclick="openTransferModal()" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer">
-                        <div class="w-10 h-10 bg-green-50 text-[#06C755] rounded-xl flex items-center justify-center text-2xl"><ion-icon name="paper-plane" mode="ios"></ion-icon></div>
-                        <span class="text-[10px] font-bold">Transfer</span>
-                    </div>
-                    <div onclick="switchScreen('lucky')" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer relative">
-                        <div class="absolute -top-2 -right-1 bg-red-500 text-white text-[8px] px-1.5 py-0.5 rounded-full font-bold">+4%</div>
-                        <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-xl flex items-center justify-center text-2xl"><ion-icon name="briefcase" mode="ios"></ion-icon></div>
-                        <span class="text-[10px] font-bold">Invest</span>
-                    </div>
-                    <div onclick="switchScreen('chat')" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer">
-                        <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center text-2xl"><ion-icon name="sparkles" mode="ios"></ion-icon></div>
-                        <span class="text-[10px] font-bold">AI Log</span>
+    <div id="screen-home" class="screen-container active ios-scroll pb-[100px] pt-12">
+        <div class="px-5 pt-2 text-white relative z-10">
+            <div class="flex justify-between items-center mb-5">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center font-bold text-sm shadow-sm">My</div>
+                    <div>
+                        <p class="text-[11px] opacity-90 uppercase tracking-widest font-semibold mb-0.5">LinePay Wallet</p>
+                        <h1 class="text-[28px] font-bold flex items-center gap-2 tracking-tight leading-none">NT$ <span id="wallet-balance">15,000</span></h1>
                     </div>
                 </div>
             </div>
 
-            <div class="px-5 mt-6 space-y-5">
-                <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-sm text-gray-800">Emotion Check</h3>
-                        <p class="text-[11px] text-[#06C755] font-bold mt-1">Peace Fund: NT$ <span id="peace-balance">1,500</span></p>
+            <div class="bg-white rounded-[24px] p-5 shadow-[0_8px_30px_rgb(0,0,0,0.08)] text-gray-800 flex justify-between items-center text-center mx-1">
+                <div onclick="openTransferModal()" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer group active:opacity-50 transition">
+                    <div class="w-12 h-12 bg-green-50 text-[#06C755] rounded-full flex items-center justify-center group-hover:scale-105 transition">
+                        <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/></svg>
                     </div>
-                    <div class="flex gap-1 bg-gray-50 p-1 rounded-xl">
-                        <button onclick="handleMood('stress', 20)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">😫</button>
-                        <button onclick="handleMood('normal', 0)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">😐</button>
-                        <button onclick="handleMood('happy', 50)" class="w-8 h-8 rounded-lg hover:bg-white text-lg transition">🥰</button>
-                    </div>
+                    <span class="text-[11px] font-semibold">Transfer</span>
                 </div>
+                <div onclick="switchScreen('lucky')" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer group active:opacity-50 transition relative">
+                    <div class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-bold shadow-sm z-10">+4%</div>
+                    <div class="w-12 h-12 bg-orange-50 text-orange-500 rounded-full flex items-center justify-center group-hover:scale-105 transition">
+                        <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V5C16 3.89543 15.1046 3 14 3H10C8.89543 3 8 3.89543 8 5V7"/></svg>
+                    </div>
+                    <span class="text-[11px] font-semibold">Invest</span>
+                </div>
+                <div onclick="switchScreen('chat')" class="flex flex-col items-center gap-2 w-1/4 cursor-pointer group active:opacity-50 transition">
+                    <div class="w-12 h-12 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center group-hover:scale-105 transition">
+                        <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z" class="sf-icon-filled"/></svg>
+                    </div>
+                    <span class="text-[11px] font-semibold">AI Log</span>
+                </div>
+            </div>
+        </div>
 
+        <div class="px-5 mt-8 space-y-6">
+            <div class="bg-white p-5 rounded-[24px] shadow-sm border border-gray-100 flex items-center justify-between">
                 <div>
-                    <div class="flex justify-between items-end mb-3">
-                        <h3 class="font-bold text-gray-800 text-sm">Recent Transactions</h3>
-                        <button onclick="switchScreen('history')" class="text-[11px] text-[#06C755] font-bold">View All</button>
+                    <h3 class="font-bold text-[15px] text-gray-800 tracking-tight">Emotion Check</h3>
+                    <p class="text-[12px] text-[#06C755] font-semibold mt-1">Peace Fund: NT$ <span id="peace-balance">1,500</span></p>
+                </div>
+                <div class="flex gap-2 bg-gray-50 p-1.5 rounded-2xl">
+                    <button onclick="handleMood('stress', 20)" class="w-9 h-9 bg-white rounded-xl shadow-sm text-xl flex justify-center items-center">😫</button>
+                    <button onclick="handleMood('normal', 0)" class="w-9 h-9 bg-white rounded-xl shadow-sm text-xl flex justify-center items-center">😐</button>
+                    <button onclick="handleMood('happy', 50)" class="w-9 h-9 bg-white rounded-xl shadow-sm text-xl flex justify-center items-center">🥰</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-end mb-3 px-1">
+                    <h3 class="font-bold text-gray-800 text-[17px] tracking-tight">Recent</h3>
+                    <button onclick="switchScreen('history')" class="text-[13px] text-[#06C755] font-semibold active:opacity-50">View All</button>
+                </div>
+                <div id="transaction-list-home" class="bg-white rounded-[24px] shadow-sm border border-gray-100 p-2 space-y-0.5">
                     </div>
-                    <div id="transaction-list-home" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 space-y-1">
-                        </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-chat" class="screen-container ios-scroll bg-gray-50 pt-10">
+        <div class="glass-header pt-3 pb-3 px-4 flex items-center gap-2 z-30 sticky top-0">
+            <button onclick="switchScreen('home')" class="text-[#06C755] flex items-center p-1">
+                <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-gradient-to-br from-green-400 to-[#06C755] rounded-full flex items-center justify-center text-white shadow-sm">
+                    <svg class="sf-icon w-5 h-5 sf-icon-filled" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-2-11.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zm4 0c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5zM12 16c-1.48 0-2.75-.81-3.45-2H8.5c.78 1.63 2.5 2.75 4.5 2.75s3.72-1.12 4.5-2.75h-2.05c-.7 1.19-1.97 2-3.45 2z"/></svg>
+                </div>
+                <div>
+                    <h2 class="font-bold text-gray-900 text-[15px] leading-tight">LineMate AI</h2>
+                    <p class="text-[11px] text-gray-500 font-medium tracking-wide">iMessage</p>
                 </div>
             </div>
         </div>
 
-        <div id="screen-chat" class="absolute inset-0 flex flex-col bg-gray-50 hidden fade-in z-20 pt-10">
-            <div class="bg-gray-50/90 backdrop-blur-md pt-2 pb-3 px-3 border-b border-gray-200 flex items-center gap-2 z-30 sticky top-0">
-                <button onclick="switchScreen('home')" class="text-[#06C755] text-3xl flex items-center"><ion-icon name="chevron-back" mode="ios"></ion-icon></button>
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center text-[#06C755] text-xl"><ion-icon name="logo-wechat" mode="ios"></ion-icon></div>
-                    <div>
-                        <h2 class="font-bold text-gray-800 text-sm leading-tight">LineMate AI</h2>
-                        <p class="text-[10px] text-gray-500">iMessage</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="chat-history" class="flex-1 p-4 overflow-y-auto space-y-3 text-[15px] pb-[100px]">
-                <div class="flex items-end gap-2 justify-start">
-                    <div class="bg-[#e5e5ea] text-black py-2 px-4 rounded-2xl rounded-bl-sm max-w-[75%] leading-snug">
-                        Hi! Tell me what you bought today. E.g., "Bus 25" or "Lunch 120"
-                    </div>
-                </div>
-            </div>
-
-            <div class="absolute bottom-[80px] w-full px-3 py-2 bg-gray-100 border-t border-gray-200 flex items-center gap-3 z-40">
-                <button class="text-gray-400 text-3xl flex items-center"><ion-icon name="add" mode="ios"></ion-icon></button>
-                <div class="flex-1 bg-white rounded-full border border-gray-300 flex items-center pl-4 pr-1 h-[36px]">
-                    <input id="chat-input" type="text" placeholder="iMessage" class="flex-1 bg-transparent text-[15px] outline-none w-full placeholder-gray-400">
-                    <button onclick="processChat()" class="bg-[#06C755] text-white rounded-full w-[28px] h-[28px] flex items-center justify-center shrink-0 active:scale-90 transition">
-                        <ion-icon name="arrow-up" mode="ios" class="text-lg font-bold"></ion-icon>
-                    </button>
+        <div id="chat-history" class="flex-1 p-4 space-y-4 text-[15px] pb-[100px] flex flex-col">
+            <div class="flex items-end gap-2 justify-start">
+                <div class="bg-[#e9e9eb] text-black py-2.5 px-4 rounded-[20px] rounded-bl-[4px] max-w-[75%] leading-snug">
+                    Hi! Tell me what you bought today. E.g., "Bus 25" or "Lunch 120"
                 </div>
             </div>
         </div>
 
-        <div id="screen-history" class="absolute inset-0 bg-gray-50 hidden fade-in z-20 overflow-y-auto pb-[100px] pt-12">
-            <div class="bg-gray-50/90 backdrop-blur-md pb-3 px-5 flex justify-between items-center z-30 border-b border-gray-200 sticky top-0">
-                <h2 class="font-bold text-gray-800 text-2xl tracking-tight">History</h2>
-                <div class="w-8 h-8 bg-gray-200 rounded-full flex justify-center items-center"><ion-icon name="search" mode="ios" class="text-gray-600 text-lg"></ion-icon></div>
-            </div>
-            <div class="p-5">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 mb-6 flex flex-col items-center">
-                    <h3 class="font-bold text-gray-800 mb-1 self-start">Expense Breakdown</h3>
-                    <p class="text-xs text-gray-400 self-start mb-4">Auto-categorized by AI</p>
-                    <div class="relative w-48 h-48">
-                        <canvas id="expenseChart"></canvas>
-                    </div>
-                </div>
-
-                <h3 class="font-bold text-gray-800 mb-3 text-sm">All Transactions</h3>
-                <div id="transaction-list-full" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 space-y-1">
-                    </div>
+        <div class="absolute bottom-[80px] w-full px-4 py-3 glass-header border-t border-gray-200 flex items-center gap-3 z-40">
+            <button class="text-gray-400 p-1 active:opacity-50"><svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+            <div class="flex-1 bg-white rounded-full border border-gray-300 flex items-center pl-4 pr-1 h-[38px] shadow-sm">
+                <input id="chat-input" type="text" placeholder="iMessage" class="flex-1 bg-transparent text-[15px] outline-none w-full placeholder-gray-400 font-medium">
+                <button onclick="processChat()" class="bg-[#06C755] text-white rounded-full w-[30px] h-[30px] flex items-center justify-center shrink-0">
+                    <svg class="sf-icon w-4 h-4" viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                </button>
             </div>
         </div>
+    </div>
 
-        <div id="screen-lucky" class="absolute inset-0 bg-gray-50 hidden fade-in z-20 overflow-y-auto pb-[100px] pt-10">
-            <div class="bg-gray-50/90 backdrop-blur-md pt-2 pb-3 px-3 flex items-center z-30 sticky top-0">
-                <button onclick="switchScreen('home')" class="text-[#06C755] text-3xl flex items-center absolute"><ion-icon name="chevron-back" mode="ios"></ion-icon></button>
-                <h2 class="font-bold text-gray-800 text-lg mx-auto">Lucky Bag</h2>
+    <div id="screen-history" class="screen-container ios-scroll bg-gray-50 pb-[100px] pt-12">
+        <div class="glass-header pb-3 px-5 flex justify-between items-center z-30 sticky top-0">
+            <h2 class="font-bold text-gray-900 text-[28px] tracking-tight">History</h2>
+            <div class="w-8 h-8 bg-gray-200 rounded-full flex justify-center items-center active:bg-gray-300 transition">
+                <svg class="sf-icon w-4 h-4 text-gray-700" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            </div>
+        </div>
+        <div class="p-5">
+            <div class="bg-white p-5 rounded-[24px] shadow-sm border border-gray-100 mb-6 flex flex-col items-center">
+                <h3 class="font-bold text-gray-900 mb-1 self-start text-[17px] tracking-tight">Expense Breakdown</h3>
+                <p class="text-[13px] text-gray-500 self-start mb-5 font-medium">Auto-categorized by AI</p>
+                <div class="relative w-52 h-52">
+                    <canvas id="expenseChart"></canvas>
+                </div>
             </div>
 
-            <div class="p-5">
-                <div class="bg-[#1a1a1a] p-8 rounded-[28px] text-white shadow-xl relative text-center border border-gray-800">
-                    <div class="absolute top-0 right-0 bg-[#06C755] text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-[16px] rounded-tr-[28px] tracking-wide">
-                        UP TO 4%/YR
-                    </div>
-                    
-                    <p class="text-gray-400 text-[11px] font-bold uppercase tracking-widest mt-2 mb-1">Total Assets</p>
-                    <h3 class="text-[40px] font-black tracking-tight mb-2 leading-none">NT$ <span id="lucky-balance">88,046</span></h3>
-                    
-                    <p class="text-[#06C755] font-bold text-sm flex justify-center items-center gap-1">
-                        <ion-icon name="caret-up" mode="ios"></ion-icon> NT$ 1,240 <span class="text-gray-400 font-medium text-xs ml-1">(Total Profit)</span>
-                    </p>
-                    <p class="text-gray-400 text-[10px] font-medium mt-1.5">
-                        Today's Profit: + NT$ 9.6
-                    </p>
+            <h3 class="font-bold text-gray-900 mb-3 text-[17px] tracking-tight px-1">All Transactions</h3>
+            <div id="transaction-list-full" class="bg-white rounded-[24px] shadow-sm border border-gray-100 p-2 space-y-0.5">
                 </div>
+        </div>
+    </div>
 
-                <div class="mt-6 bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
-                    <p class="text-sm font-bold text-gray-800 mb-3">Deposit to Lucky Bag</p>
-                    <div class="flex gap-2">
-                        <input id="deposit-input" type="number" placeholder="Amount (NT$)" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-[#06C755]">
-                        <button onclick="handleDeposit()" class="bg-[#06C755] text-white font-bold px-5 py-3 rounded-xl text-sm shadow-md active:scale-95 transition">Deposit</button>
-                    </div>
+    <div id="screen-lucky" class="screen-container ios-scroll bg-gray-50 pb-[100px] pt-10">
+        <div class="glass-header pt-3 pb-3 px-4 flex items-center z-30 sticky top-0">
+            <button onclick="switchScreen('home')" class="text-[#06C755] flex items-center p-1 absolute">
+                <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <h2 class="font-bold text-gray-900 text-[17px] tracking-tight mx-auto">Lucky Bag</h2>
+        </div>
+
+        <div class="p-5">
+            <div class="bg-gradient-to-br from-[#1c1c1e] to-[#2c2c2e] p-8 rounded-[32px] text-white shadow-[0_15px_30px_rgba(0,0,0,0.15)] relative text-center border border-gray-700/50">
+                <div class="absolute top-0 right-0 bg-[#06C755] text-white text-[10px] font-bold px-3 py-1.5 rounded-bl-[20px] rounded-tr-[32px] tracking-wider shadow-sm">
+                    UP TO 4%/YR
                 </div>
+                
+                <p class="text-gray-400 text-[12px] font-bold uppercase tracking-[0.2em] mt-2 mb-1">Total Assets</p>
+                <h3 class="text-[42px] font-bold tracking-tight mb-2 leading-none">NT$ <span id="lucky-balance">88,046</span></h3>
+                
+                <p class="text-[#06C755] font-semibold text-[15px] flex justify-center items-center gap-1 mt-3">
+                    <svg class="sf-icon-filled w-3 h-3" viewBox="0 0 24 24"><path d="M12 4l8 12H4z"/></svg>
+                    NT$ 1,240 <span class="text-gray-400 font-medium text-[13px] ml-1">(Total Profit)</span>
+                </p>
+                <p class="text-gray-400 text-[12px] font-medium mt-1">
+                    Today's Profit: + NT$ 9.6
+                </p>
+            </div>
 
-                <h4 class="font-bold text-gray-800 mt-8 mb-3 px-1 text-sm">AI Portfolios</h4>
-                <div class="space-y-3">
-                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-orange-50 text-orange-500 rounded-full flex justify-center items-center text-xl"><ion-icon name="bar-chart" mode="ios"></ion-icon></div>
-                            <div>
-                                <p class="font-bold text-sm text-gray-800">Stock Investment</p>
-                                <p class="text-[10px] text-gray-400">Maximize profit</p>
-                            </div>
+            <div class="mt-8 bg-white p-5 rounded-[24px] shadow-sm border border-gray-100">
+                <p class="text-[15px] font-bold text-gray-900 mb-3 tracking-tight">Deposit to Lucky Bag</p>
+                <div class="flex gap-2">
+                    <input id="deposit-input" type="number" placeholder="Amount (NT$)" class="flex-1 bg-gray-50 border border-gray-200 rounded-[16px] px-4 py-3 text-[15px] font-medium outline-none focus:border-[#06C755] transition-colors">
+                    <button onclick="handleDeposit()" class="bg-[#06C755] text-white font-semibold px-6 py-3 rounded-[16px] text-[15px] shadow-sm">Deposit</button>
+                </div>
+            </div>
+
+            <h4 class="font-bold text-gray-900 mt-8 mb-3 px-1 text-[17px] tracking-tight">AI Portfolios</h4>
+            <div class="space-y-3">
+                <div class="bg-white p-4 rounded-[20px] border border-gray-100 flex justify-between items-center shadow-sm active:bg-gray-50 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 bg-orange-50 text-orange-500 rounded-full flex justify-center items-center">
+                            <svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
                         </div>
-                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2.5 py-1 rounded-full font-bold">Active</span>
-                    </div>
-                    <div class="bg-white p-4 rounded-2xl border border-gray-100 flex justify-between items-center shadow-sm">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-full flex justify-center items-center text-xl"><ion-icon name="shield-checkmark" mode="ios"></ion-icon></div>
-                            <div>
-                                <p class="font-bold text-sm text-gray-800">Stable Savings</p>
-                                <p class="text-[10px] text-gray-400">Low Risk, Daily Interest</p>
-                            </div>
+                        <div>
+                            <p class="font-bold text-[15px] text-gray-900">Stock Investment</p>
+                            <p class="text-[12px] text-gray-500 font-medium mt-0.5">Maximize profit</p>
                         </div>
-                        <span class="text-[10px] text-[#06C755] bg-green-50 px-2.5 py-1 rounded-full font-bold">Active</span>
                     </div>
+                    <span class="text-[11px] text-[#06C755] bg-green-50 px-3 py-1 rounded-full font-bold">Active</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="transfer-modal" class="hidden absolute inset-0 bg-black/40 z-[100] flex items-center justify-center p-5 fade-in">
-        <div class="bg-white/95 backdrop-blur-xl rounded-3xl p-6 w-full max-w-[300px] shadow-2xl">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-lg text-gray-800">Send Money</h3>
-                <button onclick="closeTransferModal()" class="text-gray-400 hover:text-gray-800 text-2xl transition flex"><ion-icon name="close-circle" mode="ios"></ion-icon></button>
+    <div id="transfer-modal" class="hidden absolute inset-0 bg-black/40 z-[100] flex items-center justify-center p-5 fade-in backdrop-blur-sm">
+        <div class="bg-white/95 backdrop-blur-xl rounded-[32px] p-6 w-full max-w-[320px] shadow-2xl transform scale-100 transition-transform">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-bold text-[20px] text-gray-900 tracking-tight">Send Money</h3>
+                <button onclick="closeTransferModal()" class="bg-gray-100 text-gray-500 rounded-full p-1.5 active:bg-gray-200 transition">
+                    <svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </button>
             </div>
-            <input id="transfer-id" type="text" placeholder="Line ID or Phone Number" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-3 focus:border-[#06C755]">
-            <input id="transfer-amount" type="number" placeholder="Amount (NT$)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none mb-5 focus:border-[#06C755]">
-            <button onclick="submitTransfer()" class="w-full bg-[#06C755] text-white font-bold py-3.5 rounded-xl shadow-md active:scale-95 transition">Send</button>
+            <input id="transfer-id" type="text" placeholder="Line ID or Phone Number" class="w-full bg-gray-50 border border-gray-200 rounded-[16px] px-4 py-3.5 text-[15px] font-medium outline-none mb-3 focus:border-[#06C755] transition-colors">
+            <input id="transfer-amount" type="number" placeholder="Amount (NT$)" class="w-full bg-gray-50 border border-gray-200 rounded-[16px] px-4 py-3.5 text-[15px] font-medium outline-none mb-5 focus:border-[#06C755] transition-colors">
+            <button onclick="submitTransfer()" class="w-full bg-[#06C755] text-white font-semibold py-3.5 rounded-[16px] text-[17px] shadow-sm">Send</button>
         </div>
     </div>
 
-    <div id="system-toast" class="hidden absolute top-14 left-1/2 transform -translate-x-1/2 w-[320px] glass-nav text-gray-800 px-4 py-3 rounded-2xl text-[13px] font-semibold z-[100] shadow-xl fade-in text-center break-words whitespace-normal leading-snug border border-white/50">
+    <div id="system-toast" class="hidden absolute top-[50px] left-1/2 transform -translate-x-1/2 w-[340px] glass-nav text-gray-900 px-5 py-3.5 rounded-[20px] text-[14px] font-semibold z-[100] shadow-[0_10px_20px_rgba(0,0,0,0.1)] fade-in text-center break-words whitespace-normal leading-snug border border-gray-200">
         Message
     </div>
 
-    <div class="absolute bottom-0 w-full h-[84px] glass-nav border-t border-gray-200/60 flex justify-between items-start pt-2 px-6 z-50">
-        <button onclick="switchScreen('home')" id="nav-home" class="flex flex-col items-center gap-0.5 text-[#06C755] w-12">
-            <ion-icon name="home" mode="ios" class="text-[26px]"></ion-icon><span class="text-[10px] font-medium">Home</span>
+    <div class="absolute bottom-0 w-full h-[84px] glass-nav border-t border-gray-200/50 flex justify-between items-start pt-2 px-6 z-50">
+        <button onclick="switchScreen('home')" id="nav-home" class="flex flex-col items-center gap-1 text-[#06C755] w-12">
+            <svg class="sf-icon w-6 h-6 sf-icon-filled" id="icon-home" viewBox="0 0 24 24"><path d="M12 3L3 10v11h6v-7h6v7h6V10L12 3z"/></svg>
+            <span class="text-[10px] font-semibold tracking-wide">Home</span>
         </button>
-        <button onclick="switchScreen('history')" id="nav-history" class="flex flex-col items-center gap-0.5 text-gray-400 w-12">
-            <ion-icon name="pie-chart-outline" mode="ios" class="text-[26px]"></ion-icon><span class="text-[10px] font-medium">History</span>
+        <button onclick="switchScreen('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400 w-12">
+            <svg class="sf-icon w-6 h-6" id="icon-history" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v10l7.5 4.5"/></svg>
+            <span class="text-[10px] font-semibold tracking-wide">History</span>
         </button>
         <button onclick="switchScreen('chat')" class="flex flex-col items-center w-12 relative -top-3">
-            <div class="w-[50px] h-[50px] bg-[#06C755] rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200/50 active:scale-90 transition">
-                <ion-icon name="sparkles" mode="ios" class="text-[24px]"></ion-icon>
+            <div class="w-[52px] h-[52px] bg-gradient-to-br from-[#10e068] to-[#06C755] rounded-full flex items-center justify-center text-white shadow-[0_5px_15px_rgba(6,199,85,0.4)]">
+                <svg class="sf-icon-filled w-6 h-6" viewBox="0 0 24 24"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z"/></svg>
             </div>
         </button>
-        <button onclick="showToast('Rewards feature is coming in Phase 2!')" class="flex flex-col items-center gap-0.5 text-gray-400 w-12">
-            <ion-icon name="gift-outline" mode="ios" class="text-[26px]"></ion-icon><span class="text-[10px] font-medium">Rewards</span>
+        <button onclick="showToast('Rewards feature is coming in Phase 2!')" class="flex flex-col items-center gap-1 text-gray-400 w-12">
+            <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M12 8v13M19 8c-2-3-7-2-7 0M5 8c2-3 7-2 7 0"/></svg>
+            <span class="text-[10px] font-semibold tracking-wide">Rewards</span>
         </button>
-        <button onclick="showToast('Account settings are under development.')" class="flex flex-col items-center gap-0.5 text-gray-400 w-12">
-            <ion-icon name="person-circle-outline" mode="ios" class="text-[26px]"></ion-icon><span class="text-[10px] font-medium">Account</span>
+        <button onclick="showToast('Account settings are under development.')" class="flex flex-col items-center gap-1 text-gray-400 w-12">
+            <svg class="sf-icon w-6 h-6" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+            <span class="text-[10px] font-semibold tracking-wide">Account</span>
         </button>
     </div>
     
@@ -270,14 +313,23 @@
         peaceFund: 1500,
         luckyBag: 88046,
         transactions: [
-            { name: "Shopee Checkout", amount: 450, icon: "bag-handle", time: "Today, 14:30" },
-            { name: "Taipei Metro", amount: 25, icon: "train", time: "Today, 08:15" },
-            { name: "Lunch Combo", amount: 150, icon: "restaurant", time: "Yesterday" }
+            { name: "Shopee Checkout", amount: 450, type: "shopping", time: "Today, 14:30" },
+            { name: "Taipei Metro", amount: 25, type: "transport", time: "Today, 08:15" },
+            { name: "Lunch Combo", amount: 150, type: "food", time: "Yesterday" }
         ]
     };
 
     let chartInstance = null;
     let toastTimeout = null;
+
+    // Bộ SVG Icon cho lịch sử giao dịch
+    const catIcons = {
+        shopping: '<svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>',
+        transport: '<svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 15h.01M16 15h.01M4 8h16M10 3v5m4-5v5"/></svg>',
+        food: '<svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><path d="M3 10h18c0 4.418-3.582 8-8 8h-2c-4.418 0-8-3.582-8-8zM3 10V8c0-1.104.896-2 2-2h14c1.104 0 2 .896 2 2v2"/></svg>',
+        transfer: '<svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M22 12h-4v-2h4"/></svg>',
+        other: '<svg class="sf-icon w-5 h-5" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zM14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>'
+    };
 
     function updateUI() {
         document.getElementById('wallet-balance').innerText = state.wallet.toLocaleString();
@@ -292,14 +344,14 @@
         
         txs.forEach((tx, index) => {
             const html = `
-                <div class="flex items-center justify-between p-3 border-b border-gray-50 active:bg-gray-100 transition">
+                <div class="flex items-center justify-between p-3 border-b border-gray-50 active:bg-gray-100 transition rounded-xl">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gray-100 text-gray-600 rounded-full flex items-center justify-center text-[20px] shadow-sm">
-                            <ion-icon name="${tx.icon}" mode="ios"></ion-icon>
+                        <div class="w-11 h-11 bg-gray-50 text-gray-700 rounded-full flex items-center justify-center shadow-sm border border-gray-100">
+                            ${catIcons[tx.type] || catIcons.other}
                         </div>
-                        <div><p class="text-sm font-semibold text-gray-800 capitalize">${tx.name}</p><p class="text-[11px] text-gray-400">${tx.time}</p></div>
+                        <div><p class="text-[15px] font-bold text-gray-900 capitalize tracking-tight">${tx.name}</p><p class="text-[12px] text-gray-500 font-medium">${tx.time}</p></div>
                     </div>
-                    <span class="text-[15px] font-semibold text-gray-800">- NT$ ${tx.amount.toLocaleString()}</span>
+                    <span class="text-[16px] font-bold text-gray-900">- NT$ ${tx.amount.toLocaleString()}</span>
                 </div>
             `;
             if(index < 3) txHome.innerHTML += html;
@@ -314,17 +366,18 @@
         let categories = { "Food": 0, "Shopping": 0, "Transport": 0, "Invest/Transfer": 0, "Other": 0 };
         
         state.transactions.forEach(tx => {
-            let n = tx.name.toLowerCase();
-            if(n.match(/shopping|bag|pen|shopee|buy|shirt|clothes/) || tx.icon === 'bag-handle') categories["Shopping"] += tx.amount;
-            else if(n.match(/bus|mrt|taxi|train|uber|grab|transport/) || tx.icon === 'train') categories["Transport"] += tx.amount;
-            else if(n.match(/transfer|deposit|lucky/) || tx.icon === 'wallet') categories["Invest/Transfer"] += tx.amount;
-            else if(n.match(/dinner|lunch|breakfast|food|coffee|drink|eat|salad/) || tx.icon === 'restaurant') categories["Food"] += tx.amount;
+            if(tx.type === 'shopping') categories["Shopping"] += tx.amount;
+            else if(tx.type === 'transport') categories["Transport"] += tx.amount;
+            else if(tx.type === 'transfer') categories["Invest/Transfer"] += tx.amount;
+            else if(tx.type === 'food') categories["Food"] += tx.amount;
             else categories["Other"] += tx.amount;
         });
 
         const labels = Object.keys(categories).filter(k => categories[k] > 0);
         const data = labels.map(k => categories[k]);
         const colors = ['#06C755', '#FF9F40', '#36A2EB', '#9966FF', '#C9CBCF'];
+
+        Chart.defaults.font.family = "'SF Pro Display', -apple-system, sans-serif";
 
         if (chartInstance) {
             chartInstance.data.labels = labels;
@@ -334,47 +387,75 @@
             chartInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: { labels: labels, datasets: [{ data: data, backgroundColor: colors, borderWidth: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: {family: '-apple-system', size: 11} } } } }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '72%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: {size: 12, weight: '500'} } } } }
             });
         }
     }
 
+    // Biến lưu màn hình hiện tại để làm animation trượt
+    let currentScreen = 'home';
+
     function switchScreen(screen) {
-        ['home', 'chat', 'lucky', 'history'].forEach(s => {
-            document.getElementById(`screen-${s}`).classList.add('hidden');
-        });
-        document.getElementById(`screen-${screen}`).classList.remove('hidden');
+        if(currentScreen === screen) return;
+
+        const oldEl = document.getElementById(`screen-${currentScreen}`);
+        const newEl = document.getElementById(`screen-${screen}`);
         
+        // Ẩn tất cả class animation
+        oldEl.classList.remove('slide-in-right', 'slide-out-left', 'fade-in');
+        newEl.classList.remove('slide-in-right', 'slide-out-left', 'fade-in');
+
+        // Logic Slide Animation
+        if(screen !== 'home' && currentScreen === 'home') {
+            oldEl.classList.add('slide-out-left');
+            newEl.classList.add('slide-in-right');
+            newEl.classList.add('active');
+            setTimeout(() => { oldEl.classList.remove('active', 'slide-out-left'); }, 400);
+        } else if (screen === 'home' && currentScreen !== 'home') {
+            // Quay về Home thì fade in cho nhẹ nhàng
+            oldEl.classList.remove('active');
+            newEl.classList.add('active', 'fade-in');
+        } else {
+            oldEl.classList.remove('active');
+            newEl.classList.add('active', 'fade-in');
+        }
+
+        currentScreen = screen;
+        
+        // Cập nhật màu Status Bar
         const headerBg = document.getElementById('bg-header');
         const statusBar = document.getElementById('status-bar-text');
         if(screen === 'home') {
-            headerBg.style.display = 'block';
+            headerBg.style.transform = 'translateY(0)';
             statusBar.classList.remove('text-black');
             statusBar.classList.add('text-white');
         } else {
-            headerBg.style.display = 'none';
+            headerBg.style.transform = 'translateY(-100%)';
             statusBar.classList.remove('text-white');
-            statusBar.classList.add('text-black');
+            statusBar.classList.add('text-gray-900');
         }
         
-        const navItems = {
-            'home': { active: 'home', inactive: 'home-outline' },
-            'history': { active: 'pie-chart', inactive: 'pie-chart-outline' }
-        };
+        // Đổi icon Nav Bottom (Nét đặc / Nét mảnh)
+        const iconHome = document.getElementById('icon-home');
+        const iconHistory = document.getElementById('icon-history');
+        
+        if (screen === 'home') {
+            document.getElementById('nav-home').className = 'flex flex-col items-center gap-1 text-[#06C755] w-12';
+            iconHome.classList.add('sf-icon-filled'); iconHome.innerHTML = '<path d="M12 3L3 10v11h6v-7h6v7h6V10L12 3z"/>';
+        } else {
+            document.getElementById('nav-home').className = 'flex flex-col items-center gap-1 text-gray-400 w-12 transition';
+            iconHome.classList.remove('sf-icon-filled'); iconHome.innerHTML = '<path d="M3 10l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2V10z"/><path d="M9 22V12h6v10"/>';
+        }
 
-        ['home', 'history'].forEach(s => {
-            const btn = document.getElementById(`nav-${s}`);
-            const icon = btn.querySelector('ion-icon');
-            if(screen === s) {
-                btn.className = 'flex flex-col items-center gap-0.5 text-[#06C755] w-12';
-                icon.setAttribute('name', navItems[s].active);
-            } else {
-                btn.className = 'flex flex-col items-center gap-0.5 text-gray-400 w-12';
-                icon.setAttribute('name', navItems[s].inactive);
-            }
-        });
+        if (screen === 'history') {
+            document.getElementById('nav-history').className = 'flex flex-col items-center gap-1 text-[#06C755] w-12';
+            iconHistory.classList.add('sf-icon-filled'); iconHistory.innerHTML = '<path d="M12 2v10l7.5 4.5A10 10 0 1012 2z"/>';
+        } else {
+            document.getElementById('nav-history').className = 'flex flex-col items-center gap-1 text-gray-400 w-12 transition';
+            iconHistory.classList.remove('sf-icon-filled'); iconHistory.innerHTML = '<circle cx="12" cy="12" r="10"/><path d="M12 2v10l7.5 4.5"/>';
+        }
 
-        if(screen === 'history') updateChart();
+        if(screen === 'history') setTimeout(updateChart, 100);
     }
 
     function showToast(message) {
@@ -395,7 +476,7 @@
         if (amount > state.wallet) return showToast("Insufficient balance!");
 
         state.wallet -= amount;
-        state.transactions.push({ name: `Transfer to ${id}`, amount: amount, icon: "paper-plane", time: "Just now" });
+        state.transactions.push({ name: `Transfer to ${id}`, amount: amount, type: "transfer", time: "Just now" });
         updateUI(); closeTransferModal();
         showToast(`Sent NT$ ${amount} to ${id}`);
         document.getElementById('transfer-id').value = ''; document.getElementById('transfer-amount').value = '';
@@ -414,7 +495,7 @@
         if (amount > state.wallet) return showToast("Insufficient balance.");
 
         state.wallet -= amount; state.luckyBag += amount;
-        state.transactions.push({ name: "Deposit to Lucky Bag", amount: amount, icon: "wallet", time: "Just now" });
+        state.transactions.push({ name: "Deposit to Lucky Bag", amount: amount, type: "transfer", time: "Just now" });
         updateUI(); document.getElementById('deposit-input').value = '';
         showToast(`Deposited NT$ ${amount} to Lucky Bag!`);
     }
@@ -425,7 +506,7 @@
         const text = input.value.trim();
         if(!text) return;
 
-        history.innerHTML += `<div class="flex justify-end fade-in"><div class="bg-[#06C755] text-white py-2 px-4 rounded-2xl rounded-br-sm max-w-[75%] leading-snug">${text}</div></div>`;
+        history.innerHTML += `<div class="flex justify-end fade-in mt-2"><div class="bg-[#06C755] text-white py-2 px-4 rounded-[20px] rounded-br-[4px] max-w-[75%] leading-snug shadow-sm">${text}</div></div>`;
         input.value = ''; history.scrollTop = history.scrollHeight;
 
         const matchAmount = text.match(/\d+/);
@@ -434,11 +515,11 @@
         const cleanName = text.replace(/\d+/g, '').trim() || 'Expense';
         const lowerText = cleanName.toLowerCase();
         
-        let catIcon = "receipt";
-        if (lowerText.match(/bus|mrt|taxi|train|uber|grab|transport/)) catIcon = "train";
-        else if (lowerText.match(/dinner|lunch|breakfast|food|coffee|drink|eat|salad/)) catIcon = "restaurant";
-        else if (lowerText.match(/shopping|bag|pen|shopee|buy|shirt|clothes/)) catIcon = "bag-handle";
-        else if (lowerText.match(/transfer|deposit|lucky/)) catIcon = "wallet";
+        let txType = "other";
+        if (lowerText.match(/bus|mrt|taxi|train|uber|grab|transport/)) txType = "transport";
+        else if (lowerText.match(/dinner|lunch|breakfast|food|coffee|drink|eat|salad/)) txType = "food";
+        else if (lowerText.match(/shopping|bag|pen|shopee|buy|shirt|clothes/)) txType = "shopping";
+        else if (lowerText.match(/transfer|deposit|lucky/)) txType = "transfer";
 
         setTimeout(() => {
             let botReply = '';
@@ -446,7 +527,7 @@
                 botReply = `<span class="text-red-600 font-bold">⚠️ Blocked (99.99% Security)</span><br>NT$ ${amount.toLocaleString()} is unusually high.`;
             } else if (amount > 0 && amount <= state.wallet) {
                 state.wallet -= amount;
-                state.transactions.push({ name: `AI Log: ${cleanName}`, amount: amount, icon: catIcon, time: "Just now" });
+                state.transactions.push({ name: `AI Log: ${cleanName}`, amount: amount, type: txType, time: "Just now" });
                 updateUI();
                 botReply = `Logged <b>${amount} NTD</b>. Your wallet has ${state.wallet.toLocaleString()} NTD left.`;
             } else if (amount > state.wallet) {
@@ -457,8 +538,8 @@
 
             history.innerHTML += `
                 <div class="flex items-end gap-2 justify-start fade-in mt-3">
-                    <div class="w-7 h-7 bg-gray-200 text-gray-500 rounded-full flex items-center justify-center text-[16px] shrink-0 shadow-sm border border-gray-100"><ion-icon name="logo-wechat" mode="ios"></ion-icon></div>
-                    <div class="bg-[#e5e5ea] text-black py-2 px-4 rounded-2xl rounded-bl-sm max-w-[75%] leading-snug">${botReply}</div>
+                    <div class="w-7 h-7 bg-gradient-to-br from-[#10e068] to-[#06C755] text-white rounded-full flex items-center justify-center text-[10px] shrink-0 shadow-sm"><svg class="sf-icon-filled w-4 h-4" viewBox="0 0 24 24"><path d="M12 3L14.5 9.5L21 12L14.5 14.5L12 21L9.5 14.5L3 12L9.5 9.5L12 3Z"/></svg></div>
+                    <div class="bg-[#e9e9eb] text-black py-2.5 px-4 rounded-[20px] rounded-bl-[4px] max-w-[75%] leading-snug">${botReply}</div>
                 </div>`;
             history.scrollTop = history.scrollHeight;
         }, 600);
